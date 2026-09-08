@@ -787,7 +787,27 @@
             opt.value = index; opt.innerText = `${currentMonth}${day.dateStr}`;
             select.appendChild(opt);
         });
-        select.value = 6; generateReport();
+
+        // 自動定位到「今天」的日期
+        let todayDate = new Date();
+        let tYear = todayDate.getFullYear() - 1911; // 轉民國年
+        let tMonth = todayDate.getMonth() + 1;
+        let tDay = todayDate.getDate();
+        let targetMonthStr = `${tYear}年${tMonth}月`;
+        let targetDayStr = `${tDay}日`;
+
+        if (targetMonthStr === currentMonth) {
+            let foundIndex = siteData.days.findIndex(d => d.dateStr === targetDayStr);
+            if (foundIndex !== -1) {
+                select.value = foundIndex;
+            } else {
+                select.value = 0;
+            }
+        } else {
+            select.value = 0;
+        }
+
+        generateReport();
     }
 
     function generateReport() {
@@ -813,7 +833,6 @@
             if (hasPm) activeSitesPm.push({ site, dData });
         });
 
-        // 智慧偵測標籤（有出工的案場才顯示）
         let allActiveNames = Array.from(new Set([...activeSitesAm.map(i => i.site.name), ...activeSitesPm.map(i => i.site.name)]));
         document.getElementById('detected-sites-tag').innerText = allActiveNames.length > 0 ? allActiveNames.join('、') : "（尚無紀錄）";
 
@@ -844,8 +863,14 @@
             );
         });
 
-        let reportText = `${fullDateStr}，上午：\n` + (amR.length > 0 ? amR.join('\n\n') : '無上午出工紀錄') + 
-                         `\n\n${fullDateStr}，下午：\n` + (pmR.length > 0 ? pmR.join('\n\n') : '無下午出工紀錄');
+        let reportText = "";
+        if (amR.length > 0) {
+            reportText += `${fullDateStr}，上午：\n----------------------------------------\n` + amR.join('\n\n');
+        }
+        if (pmR.length > 0) {
+            if (reportText !== "") reportText += "\n\n";
+            reportText += `${fullDateStr}，下午：\n----------------------------------------\n` + pmR.join('\n\n');
+        }
 
         document.getElementById('report-output').innerText = reportText;
     }
@@ -858,7 +883,21 @@
         const select = document.getElementById('log-date-select');
         select.innerHTML = '';
         for (let i = 1; i <= 30; i++) { select.add(new Option(`${i}日`, i)); }
-        select.value = 7; initLogProjectSelect(); renderLogForm();
+
+        // 施工日誌填報也自動對應到今天日期
+        let todayDate = new Date();
+        let tMonth = todayDate.getMonth() + 1;
+        let tDay = todayDate.getDate();
+        let targetMonthStr = `${todayDate.getFullYear() - 1911}年${tMonth}月`;
+
+        if (targetMonthStr === currentMonth && tDay >= 1 && tDay <= 30) {
+            select.value = tDay;
+        } else {
+            select.value = 7;
+        }
+
+        initLogProjectSelect();
+        renderLogForm();
     }
 
     function initLogProjectSelect() {
