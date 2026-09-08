@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程出工人數與施工日誌管理系統</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1550px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            background-color: #55a630;
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .control-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 15px;
+            flex-wrap: nowrap;
+            gap: 15px;
+            white-space: nowrap;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+        .control-group input, .control-group select {
+            padding: 6px 10px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .btn {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .btn:hover { background-color: #2b6cb0; }
+        .btn-success { background-color: #38a169; }
+        .btn-success:hover { background-color: #2f855a; }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            background-color: #e9ecef;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            color: #495057;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-btn.active {
+            background-color: #55a630;
+            color: white;
+        }
+        .tab-btn.report-tab {
+            background-color: #3182ce;
+            color: white;
+        }
+        .tab-btn.report-tab.active {
+            background-color: #2b6cb0;
+        }
+        .tab-btn.log-tab {
+            background-color: #d69e2e;
+            color: white;
+        }
+        .tab-btn.log-tab.active {
+            background-color: #b7791f;
+        }
+        .tab-btn.export-tab {
+            background-color: #805ad5;
+            color: white;
+        }
+        .tab-btn.export-tab.active {
+            background-color: #553c9a;
+        }
+        .close-site {
+            background: rgba(0,0,0,0.2);
+            color: #fff;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .close-site:hover { background: rgba(0,0,0,0.5); }
+        .edit-site {
+            background: rgba(0,0,0,0.2);
+            color: #fff;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .edit-site:hover { background: rgba(0,0,0,0.5); }
+
+        .table-responsive {
+            max-height: 720px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            table-layout: auto;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 14px 10px;
+            text-align: center;
+            font-size: 15px;
+            position: relative;
+        }
+        th {
+            background-color: #e2e8f0;
+            color: #1a202c;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: 16px;
+            user-select: none;
+        }
+        .resizer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 8px;
+            cursor: col-resize;
+            user-select: none;
+            touch-action: none;
+            height: 100%;
+        }
+        .resizer:hover, .resizing {
+            background-color: #3182ce;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        textarea.resizable-box {
+            width: 95%;
+            min-height: 45px;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 15px;
+            resize: both;
+        }
+        .worker-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+        }
+        .worker-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #edf2f7;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid #cbd5e0;
+        }
+        .worker-badge input { cursor: pointer; transform: scale(1.1); }
+
+        .report-section {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #cbd5e0;
+        }
+        .report-section h3 { margin-top: 0; color: #1e293b; }
+        .report-box {
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #94a3b8;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+        .config-area {
+            margin-bottom: 15px;
+            background: #fffbeb;
+            padding: 12px;
+            border: 1px solid #fde68a;
+            border-radius: 4px;
+            font-size: 15px;
+        }
+        .config-area input { width: 320px; margin-left: 10px; }
+
+        .sub-container {
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+        }
+        .log-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin: 10px 0;
+        }
+        .log-field {
+            background: #f8fafc;
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+        }
+        .log-field input { width: 70px; text-align: center; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1 id="main-title">工程出工人數與施工日誌管理系統</h1>
+
+    <div class="control-panel">
+        <div class="control-group">
+            <label><strong>目前檢視年月：</strong></label>
+            <select id="month-select" onchange="switchMonth(this.value)"></select>
+            <span style="margin-left: 5px;">新增：</span>
+            <input type="text" id="new-year-input" placeholder="年 (例: 115年)" style="width: 80px;">
+            <input type="text" id="new-month-input" placeholder="月 (例: 10月)" style="width: 80px;">
+            <button class="btn btn-success" onclick="addNewMonth()">＋ 新增年月</button>
+        </div>
+        <div class="control-group">
+            <input type="text" id="new-site-name" placeholder="請輸入新案場名稱 (例如: 新市工地)" style="width: 240px;">
+            <button class="btn btn-success" onclick="addNewSite()">＋ 新增案場</button>
+        </div>
+    </div>
+
+    <div class="tabs" id="site-tabs"></div>
+
+    <!-- 一般案場勾選表格 -->
+    <div id="site-content-pane">
+        <div class="config-area">
+            <label><strong>此工地可用工班/人員名單（用逗號分隔）：</strong></label>
+            <input type="text" id="worker-list-input" placeholder="例如: 盧明君, 林智宇, 吳炫德, 邱龍展">
+            <button class="btn" onclick="updateWorkerList()">更新名單</button>
+            <span style="color: #666; font-size: 13px; margin-left: 15px;">💡 提示：按住任一表頭欄位右側邊緣，可自由左右拖曳拉寬或縮小欄位！</span>
+        </div>
+
+        <div class="table-responsive">
+            <table id="main-table">
+                <thead>
+                    <tr>
+                        <th style="width: 65px;">項次<div class="resizer"></div></th>
+                        <th style="width: 140px;">日期<div class="resizer"></div></th>
+                        <th style="width: 26%;">上午出工人員<div class="resizer"></div></th>
+                        <th style="width: 18%;">上午施工項目<div class="resizer"></div></th>
+                        <th style="width: 26%;">下午出工人員<div class="resizer"></div></th>
+                        <th style="width: 18%;">下午施工項目<div class="resizer"></div></th>
+                        <th style="width: 14%;">未出工人員<div class="resizer"></div></th>
+                        <th style="width: 14%;">備註<div class="resizer"></div></th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 📋 每日回報分頁區 -->
+    <div id="report-content-pane" style="display: none;">
+        <div class="sub-container">
+            <h2 style="color: #3182ce; margin-top:0;">📋 當日回報文字預覽</h2>
+            <p>在此頁面您可以挑選日期，系統會**自動偵測**您當天在哪些案場有填寫出工人員或施工項目，並自動帶入彙整！</p>
+            
+            <div style="margin: 15px 0; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                <div>
+                    選擇要檢視/複製的日期：
+                    <select id="report-date-select" onchange="generateReport()" style="padding: 6px; font-size: 14px;"></select>
+                </div>
+                <div>
+                    <strong>系統自動偵測今日有出工的案場：</strong>
+                    <span id="detected-sites-tag" style="color: #38a169; font-weight: bold; margin-left: 5px;"></span>
+                </div>
+            </div>
+
+            <div class="report-section" style="margin-top: 10px;">
+                <h3>當日回報文字預覽（自動統計上下午人數）</h3>
+                <div class="report-box" id="report-output">載入中...</div>
+                <button class="btn btn-success" style="font-size: 16px; padding: 10px 20px;" onclick="copyReport()">一鍵複製回報內容</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📝 詳細施工日誌填報 -->
+    <div id="log-content-pane" style="display: none;">
+        <div class="sub-container">
+            <h2 style="color: #d69e2e; margin-top:0;">📝 每日詳細施工日誌填報</h2>
+            <div style="margin-bottom: 20px;">
+                <label><strong>選擇填報日期：</strong></label>
+                <select id="log-date-select" onchange="renderLogForm()" style="padding: 8px; font-size: 15px; width: 180px;"></select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 20px; margin-bottom: 20px; align-items: start;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px;"><strong>工程名稱（可下拉選取案場）：</strong></label>
+                    <select id="log-project-select" onchange="onLogProjectChange()" style="width: 100%; padding: 10px; font-size: 15px; height: 42px;"></select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px;"><strong>禮拜（自動計算）：</strong></label>
+                    <input type="text" id="log-weekday" readonly style="width: 100%; padding: 10px; font-size: 15px; height: 42px; background-color: #e2e8f0; cursor: not-allowed; text-align: center; font-weight: bold; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 20px; margin-bottom: 20px; align-items: start;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px;"><strong>上午天氣：</strong></label>
+                    <select id="log-weather-am" onchange="saveLogData()" style="width: 100%; padding: 10px; font-size: 15px; height: 42px;">
+                        <option value="晴">晴</option>
+                        <option value="雨">雨</option>
+                        <option value="陰">陰</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px;"><strong>下午天氣：</strong></label>
+                    <select id="log-weather-pm" onchange="saveLogData()" style="width: 100%; padding: 10px; font-size: 15px; height: 42px;">
+                        <option value="晴">晴</option>
+                        <option value="雨">雨</option>
+                        <option value="陰">陰</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px;"><strong>出工人員（可自行自由增減/外勞等）：</strong></label>
+                    <input type="text" id="log-workers-summary" oninput="saveLogData()" style="width: 100%; padding: 10px; font-size: 15px; height: 42px; background-color: #fff; border: 1px solid #cbd5e0; box-sizing: border-box;" placeholder="自動帶入，也可手動修改">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px;"><strong>今日施工進度⬇️：</strong></label>
+                <textarea id="log-progress" rows="3" oninput="saveLogData()" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;"></textarea>
+            </div>
+
+            <h3>📊 各工種出工人數細目：</h3>
+            <div class="log-grid" id="log-trades-grid"></div>
+
+            <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr; gap: 15px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px;"><strong>🌟 施工取樣試驗紀錄：</strong></label>
+                    <textarea id="log-sampling" rows="2" oninput="saveLogData()" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;"></textarea>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px;"><strong>🌟 通知協力廠商辦理事項：</strong></label>
+                    <textarea id="log-notice" rows="2" oninput="saveLogData()" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;"></textarea>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px;"><strong>🌟 重要事項紀錄：</strong></label>
+                    <textarea id="log-important" rows="2" oninput="saveLogData()" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;"></textarea>
+                </div>
+            </div>
+
+            <div class="report-section" style="margin-top: 20px;">
+                <h3>📋 完整日誌文字預覽與複製</h3>
+                <div class="report-box" id="log-text-output">載入中...</div>
+                <button class="btn btn-success" style="font-size: 16px; padding: 10px 20px;" onclick="copyLogReport()">一鍵複製詳細日誌</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📊 總表匯出 -->
+    <div id="export-content-pane" style="display: none;">
+        <div class="sub-container">
+            <h2 style="color: #805ad5; margin-top:0;">📊 全案場 Excel 總表匯出與總覽</h2>
+            <p>在此頁面您可以預覽所有案場在目前選定月份的出工統計彙整，並一鍵匯出包含各案場完整明細的多分頁 Excel 檔案（.xlsx）。</p>
+            <div style="margin: 20px 0;">
+                <button class="btn btn-success" style="font-size: 18px; padding: 12px 25px; background-color: #805ad5;" onclick="exportToExcel()">📥 匯出當月完整總表 Excel 檔案</button>
+            </div>
+            <div id="export-preview-table" class="table-responsive"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const defaultSites = [
+        { id: 'qigu', name: '七股', title: '臺南市七股區圖書館耐震補強工程出工人數統計' },
+        { id: 'beiliao', name: '北寮里活動中心', title: '南化區北寮里活動中心耐震補強工程' },
+        { id: 'annan', name: '安南-溪頂', title: '臺南市安南區溪頂寮工程出工人數統計' },
+        { id: 'company', name: '公司', title: '公司內部出工統計' }
+    ];
+
+    const defaultWorkers = ["盧明君", "林智宇", "吳炫德", "邱龍展"];
+    const tradeList = ["植筋工", "鋼筋工", "模板工", "泥水工", "機械操作工", "體力工", "建築細木工", "水電工", "混凝土澆置工", "路面鋪設工", "砌石工", "油漆工", "鐵工", "鷹架工", "吊車", "防水工"];
+
+    function getInitialDB() {
+        let db = {};
+        let months = ['115年9月', '115年10月'];
+        months.forEach(m => {
+            db[m] = {
+                sites: JSON.parse(JSON.stringify(defaultSites)),
+                data: {},
+                logs: {}
+            };
+            defaultSites.forEach(site => {
+                let daysCount = m.includes('9月') ? 30 : 31;
+                let dayList = [];
+                let siteLogs = {};
+                for (let i = 1; i <= daysCount; i++) {
+                    dayList.push({
+                        dayIndex: i,
+                        dateStr: `${i}日`,
+                        amWorkers: (site.id === 'company' && i === 8) ? ["盧明君", "邱龍展", "吳炫德"] : [],
+                        amProject: (site.id === 'company' && i === 8) ? "無" : "",
+                        pmWorkers: [],
+                        pmProject: "",
+                        unworked: (site.id === 'company' && i === 8) ? ["林智宇"] : [],
+                        note: ""
+                    });
+
+                    siteLogs[i] = {
+                        selectedSiteId: site.id,
+                        weatherAm: "晴",
+                        weatherPm: "晴",
+                        workersSummary: i === 7 ? "宇、叡" : "",
+                        progress: i === 7 ? "1️⃣牆壁打除抓後方漏水。" : "",
+                        trades: i === 7 ? {"體力工": 2} : {},
+                        sampling: "",
+                        notice: "",
+                        important: ""
+                    };
+                }
+                db[m].data[site.id] = { workers: [...defaultWorkers], days: dayList };
+                db[m].logs[site.id] = siteLogs;
+            });
+        });
+        return db;
+    }
+
+    let appData = JSON.parse(localStorage.getItem('construction_master_db_v12')) || getInitialDB();
+    let currentMonth = Object.keys(appData)[0] || '115年9月';
+    let currentSiteId = appData[currentMonth].sites[0].id;
+
+    function saveDB() {
+        localStorage.setItem('construction_master_db_v12', JSON.stringify(appData));
+    }
+
+    function getWeekdayString(monthStr, dayIndex) {
+        let yearMatch = monthStr.match(/(\d+)年/);
+        let monthMatch = monthStr.match(/(\d+)月/);
+        if (!yearMatch || !monthMatch) return "禮拜一";
+
+        let taiwanYear = parseInt(yearMatch[1]);
+        let westernYear = taiwanYear + 1911;
+        let month = parseInt(monthMatch[1]) - 1;
+        let dateObj = new Date(westernYear, month, dayIndex);
+
+        let weekdays = ["禮拜日", "禮拜一", "禮拜二", "禮拜三", "禮拜四", "禮拜五", "禮拜六"];
+        return weekdays[dateObj.getDay()];
+    }
+
+    function initMonthSelect() {
+        const select = document.getElementById('month-select');
+        select.innerHTML = '';
+        Object.keys(appData).forEach(m => {
+            let opt = document.createElement('option');
+            opt.value = m;
+            opt.innerText = m;
+            if (m === currentMonth) opt.selected = true;
+            select.appendChild(opt);
+        });
+    }
+
+    function switchMonth(month) {
+        currentMonth = month;
+        if (!appData[currentMonth]) {
+            appData[currentMonth] = {
+                sites: JSON.parse(JSON.stringify(defaultSites)),
+                data: {},
+                logs: {}
+            };
+            defaultSites.forEach(site => {
+                let dayList = [];
+                let siteLogs = {};
+                for (let i = 1; i <= 30; i++) {
+                    dayList.push({ dayIndex: i, dateStr: `${i}日`, amWorkers: [], amProject: '', pmWorkers: [], pmProject: '', unworked: [], note: '' });
+                    siteLogs[i] = { selectedSiteId: site.id, weatherAm: '晴', weatherPm: '晴', progress: '', trades: {}, sampling: '', notice: '', important: '' };
+                }
+                appData[currentMonth].data[site.id] = { workers: [...defaultWorkers], days: dayList };
+                appData[currentMonth].logs[site.id] = siteLogs;
+            });
+            saveDB();
+        }
+        let monthSites = appData[currentMonth].sites;
+        if (!['report_tab', 'log_tab', 'export_tab'].includes(currentSiteId) && !monthSites.some(s => s.id === currentSiteId)) {
+            currentSiteId = monthSites[0].id;
+        }
+        initUI();
+    }
+
+    function addNewMonth() {
+        let yearInput = document.getElementById('new-year-input');
+        let monthInput = document.getElementById('new-month-input');
+        let yearVal = yearInput.value.trim();
+        let monthVal = monthInput.value.trim();
+
+        if (!yearVal || !monthVal) {
+            alert('請完整輸入「年」與「月」！（例如 年填 115年，月填 10月）');
+            return;
+        }
+
+        let val = yearVal + monthVal;
+        if (appData[val]) { alert('此年月已存在！'); return; }
+
+        appData[val] = { sites: JSON.parse(JSON.stringify(defaultSites)), data: {}, logs: {} };
+        defaultSites.forEach(site => {
+            let dayList = [];
+            let siteLogs = {};
+            for (let i = 1; i <= 30; i++) {
+                dayList.push({ dayIndex: i, dateStr: `${i}日`, amWorkers: [], amProject: '', pmWorkers: [], pmProject: '', unworked: [], note: '' });
+                siteLogs[i] = { selectedSiteId: site.id, weatherAm: '晴', weatherPm: '晴', progress: '', trades: {}, sampling: '', notice: '', important: '' };
+            }
+            appData[val].data[site.id] = { workers: [...defaultWorkers], days: dayList };
+            appData[val].logs[site.id] = siteLogs;
+        });
+        saveDB();
+        currentMonth = val;
+        yearInput.value = '';
+        monthInput.value = '';
+        initMonthSelect();
+        initUI();
+        alert(`已成功新增並切換至 ${val}！`);
+    }
+
+    function addNewSite() {
+        let input = document.getElementById('new-site-name');
+        let name = input.value.trim();
+        if (!name) { alert('請輸入案場名稱'); return; }
+        let siteId = 'site_' + Date.now();
+        let monthSites = appData[currentMonth].sites;
+        if (monthSites.some(s => s.name === name)) { alert('此案場名稱已存在！'); return; }
+        
+        monthSites.push({ id: siteId, name: name, title: `臺南市${name}工程出工人數統計` });
+
+        let dayList = [];
+        let siteLogs = {};
+        for (let i = 1; i <= 30; i++) {
+            dayList.push({ dayIndex: i, dateStr: `${i}日`, amWorkers: [], amProject: '', pmWorkers: [], pmProject: '', unworked: [], note: '' });
+            siteLogs[i] = { selectedSiteId: siteId, weatherAm: '晴', weatherPm: '晴', progress: '', trades: {}, sampling: '', notice: '', important: '' };
+        }
+        appData[currentMonth].data[siteId] = { workers: [...defaultWorkers], days: dayList };
+        appData[currentMonth].logs[siteId] = siteLogs;
+        saveDB();
+        currentSiteId = siteId;
+        input.value = '';
+        initUI();
+        alert(`已成功新增案場：${name}！`);
+    }
+
+    function deleteSite(siteId, event) {
+        event.stopPropagation();
+        if (!confirm('確定要刪除此案場嗎？')) return;
+        let monthSites = appData[currentMonth].sites;
+        if (monthSites.length <= 1) { alert('至少需保留一個案場！'); return; }
+        appData[currentMonth].sites = monthSites.filter(s => s.id !== siteId);
+        delete appData[currentMonth].data[siteId];
+        delete appData[currentMonth].logs[siteId];
+        saveDB();
+        currentSiteId = appData[currentMonth].sites[0].id;
+        initUI();
+    }
+
+    function editSiteName(siteId, event) {
+        event.stopPropagation();
+        let monthSites = appData[currentMonth].sites;
+        let site = monthSites.find(s => s.id === siteId);
+        if (!site) return;
+
+        let newName = prompt("請輸入新的案場名稱：", site.name);
+        if (newName === null) return;
+        newName = newName.trim();
+        if (!newName) { alert('案場名稱不能為空！'); return; }
+
+        if (monthSites.some(s => s.id !== siteId && s.name === newName)) {
+            alert('此案場名稱已存在！');
+            return;
+        }
+
+        site.name = newName;
+        site.title = `臺南市${newName}工程出工人數統計`;
+        saveDB();
+        initUI();
+    }
+
+    function initUI() {
+        initMonthSelect();
+        initTabs();
+
+        const sitePane = document.getElementById('site-content-pane');
+        const reportPane = document.getElementById('report-content-pane');
+        const logPane = document.getElementById('log-content-pane');
+        const exportPane = document.getElementById('export-content-pane');
+
+        sitePane.style.display = 'none';
+        reportPane.style.display = 'none';
+        logPane.style.display = 'none';
+        exportPane.style.display = 'none';
+
+        const mainTitle = document.getElementById('main-title');
+        let monthSites = appData[currentMonth].sites;
+
+        if (currentSiteId === 'report_tab') {
+            reportPane.style.display = 'block';
+            mainTitle.innerText = `📋 每日回報總覽（自動偵測當日出工案場）`;
+            initReportPane();
+        } else if (currentSiteId === 'log_tab') {
+            logPane.style.display = 'block';
+            mainTitle.innerText = "📝 每日詳細施工日誌填報";
+            initLogPane();
+        } else if (currentSiteId === 'export_tab') {
+            exportPane.style.display = 'block';
+            mainTitle.innerText = "📊 全案場 Excel 總表匯出與總覽";
+            renderExportPreview();
+        } else {
+            sitePane.style.display = 'block';
+            let currentSite = monthSites.find(s => s.id === currentSiteId) || monthSites[0];
+            currentSiteId = currentSite.id;
+            mainTitle.innerText = currentSite.title;
+            renderSitePane();
+        }
+    }
+
+    function initTabs() {
+        const tabsContainer = document.getElementById('site-tabs');
+        tabsContainer.innerHTML = '';
+        let monthSites = appData[currentMonth].sites;
+
+        monthSites.forEach(site => {
+            const btn = document.createElement('button');
+            btn.className = `tab-btn ${site.id === currentSiteId ? 'active' : ''}`;
+            
+            let spanName = document.createElement('span');
+            spanName.innerText = site.name;
+            spanName.onclick = () => { currentSiteId = site.id; initUI(); };
+            btn.appendChild(spanName);
+
+            let editBtn = document.createElement('span');
+            editBtn.className = 'edit-site';
+            editBtn.innerHTML = '✎';
+            editBtn.title = '修改案場名稱';
+            editBtn.onclick = (e) => editSiteName(site.id, e);
+            btn.appendChild(editBtn);
+
+            if (monthSites.length > 1) {
+                let closeBtn = document.createElement('span');
+                closeBtn.className = 'close-site';
+                closeBtn.innerHTML = '&times;';
+                closeBtn.title = '刪除此案場';
+                closeBtn.onclick = (e) => deleteSite(site.id, e);
+                btn.appendChild(closeBtn);
+            }
+            tabsContainer.appendChild(btn);
+        });
+
+        const reportBtn = document.createElement('button');
+        reportBtn.className = `tab-btn report-tab ${currentSiteId === 'report_tab' ? 'active' : ''}`;
+        reportBtn.innerText = '📋 每日回報';
+        reportBtn.onclick = () => { currentSiteId = 'report_tab'; initUI(); };
+        tabsContainer.appendChild(reportBtn);
+
+        const logBtn = document.createElement('button');
+        logBtn.className = `tab-btn log-tab ${currentSiteId === 'log_tab' ? 'active' : ''}`;
+        logBtn.innerText = '📝 施工日誌填報';
+        logBtn.onclick = () => { currentSiteId = 'log_tab'; initUI(); };
+        tabsContainer.appendChild(logBtn);
+
+        const exportBtn = document.createElement('button');
+        exportBtn.className = `tab-btn export-tab ${currentSiteId === 'export_tab' ? 'active' : ''}`;
+        exportBtn.innerText = '📊 總表匯出';
+        exportBtn.onclick = () => { currentSiteId = 'export_tab'; initUI(); };
+        tabsContainer.appendChild(exportBtn);
+    }
+
+    function renderSitePane() {
+        let monthSites = appData[currentMonth].sites;
+        let currentSite = monthSites.find(s => s.id === currentSiteId) || monthSites[0];
+        currentSiteId = currentSite.id;
+
+        let siteData = appData[currentMonth].data[currentSiteId];
+        document.getElementById('worker-list-input').value = siteData.workers.join(', ');
+
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = '';
+
+        siteData.days.forEach((row, index) => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.dayIndex}</td>
+                <td><strong style="white-space: nowrap;">${currentMonth}${row.dateStr}</strong></td>
+                <td>
+                    <div class="worker-selector">
+                        ${siteData.workers.map(w => `
+                            <label class="worker-badge">
+                                <input type="checkbox" value="${w}" ${row.amWorkers.includes(w) ? 'checked' : ''} onchange="updateWorker(${index}, 'am', '${w}', this.checked)">
+                                ${w}
+                            </label>
+                        `).join('')}
+                    </div>
+                </td>
+                <td><textarea class="resizable-box" oninput="updateField(${index}, 'amProject', this.value)">${row.amProject || ''}</textarea></td>
+                <td>
+                    <div class="worker-selector">
+                        ${siteData.workers.map(w => `
+                            <label class="worker-badge">
+                                <input type="checkbox" value="${w}" ${row.pmWorkers.includes(w) ? 'checked' : ''} onchange="updateWorker(${index}, 'pm', '${w}', this.checked)">
+                                ${w}
+                            </label>
+                        `).join('')}
+                    </div>
+                </td>
+                <td><textarea class="resizable-box" oninput="updateField(${index}, 'pmProject', this.value)">${row.pmProject || ''}</textarea></td>
+                <td>
+                    <div class="worker-selector">
+                        ${siteData.workers.map(w => `
+                            <label class="worker-badge">
+                                <input type="checkbox" value="${w}" ${row.unworked.includes(w) ? 'checked' : ''} onchange="updateWorker(${index}, 'unworked', '${w}', this.checked)">
+                                ${w}
+                            </label>
+                        `).join('')}
+                    </div>
+                </td>
+                <td><textarea class="resizable-box" oninput="updateField(${index}, 'note', this.value)">${row.note || ''}</textarea></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        initColumnResizer();
+    }
+
+    function initColumnResizer() {
+        const table = document.getElementById('main-table');
+        const cols = table.querySelectorAll('th');
+        cols.forEach((th) => {
+            const resizer = th.querySelector('.resizer');
+            if (!resizer) return;
+
+            let x = 0;
+            let w = 0;
+
+            const mouseDownHandler = function (e) {
+                x = e.clientX;
+                w = th.offsetWidth;
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
+                resizer.classList.add('resizing');
+            };
+
+            const mouseMoveHandler = function (e) {
+                const dx = e.clientX - x;
+                th.style.width = `${w + dx}px`;
+            };
+
+            const mouseUpHandler = function () {
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+                resizer.classList.remove('resizing');
+            };
+
+            resizer.addEventListener('mousedown', mouseDownHandler);
+        });
+    }
+
+    function updateWorker(dayIndex, type, workerName, isChecked) {
+        let siteData = appData[currentMonth].data[currentSiteId];
+        let dayData = siteData.days[dayIndex];
+        let targetList = type === 'am' ? dayData.amWorkers : (type === 'pm' ? dayData.pmWorkers : dayData.unworked);
+
+        if (isChecked) {
+            if (!targetList.includes(workerName)) targetList.push(workerName);
+        } else {
+            let idx = targetList.indexOf(workerName);
+            if (idx > -1) targetList.splice(idx, 1);
+        }
+        saveDB();
+    }
+
+    function updateField(dayIndex, fieldName, value) {
+        let siteData = appData[currentMonth].data[currentSiteId];
+        siteData.days[dayIndex][fieldName] = value;
+        saveDB();
+    }
+
+    function updateWorkerList() {
+        let inputVal = document.getElementById('worker-list-input').value;
+        let newWorkers = inputVal.split(',').map(w => w.trim()).filter(w => w !== '');
+        appData[currentMonth].data[currentSiteId].workers = newWorkers;
+        saveDB();
+        renderSitePane();
+        alert('工人名單已更新！');
+    }
+
+    function initReportPane() {
+        const select = document.getElementById('report-date-select');
+        let firstSiteId = appData[currentMonth].sites[0].id;
+        let siteData = appData[currentMonth].data[firstSiteId];
+        
+        select.innerHTML = '';
+        siteData.days.forEach((day, index) => {
+            let opt = document.createElement('option');
+            opt.value = index;
+            opt.innerText = `${currentMonth}${day.dateStr}`;
+            select.appendChild(opt);
+        });
+        select.value = 6;
+        if (select.value === null || select.value === "") select.value = 0;
+
+        generateReport();
+    }
+
+    function generateReport() {
+        const selectIndex = document.getElementById('report-date-select').value;
+        if (selectIndex === undefined || selectIndex === "") return;
+
+        let monthSites = appData[currentMonth].sites;
+        let monthDataObj = appData[currentMonth].data;
+        let firstSiteData = monthDataObj[monthSites[0].id];
+        let dayData = firstSiteData.days[selectIndex];
+        let fullDateStr = `${currentMonth}${dayData.dateStr}`;
+
+        let activeSites = [];
+
+        monthSites.forEach(site => {
+            let sData = monthDataObj[site.id];
+            if (!sData) return;
+            let dData = sData.days[selectIndex];
+            let hasAmWork = dData.amWorkers.length > 0 || (dData.amProject && dData.amProject.trim() !== '');
+            let hasPmWork = dData.pmWorkers.length > 0 || (dData.pmProject && dData.pmProject.trim() !== '');
+
+            if (hasAmWork || hasPmWork) {
+                activeSites.push({ site, dData });
+            }
+        });
+
+        let tagSpan = document.getElementById('detected-sites-tag');
+        if (activeSites.length > 0) {
+            tagSpan.innerText = activeSites.map(item => item.site.name).join('、');
+        } else {
+            tagSpan.innerText = "（尚無案場有出工紀錄，請先至各案場表格勾選或填寫）";
+        }
+
+        if (activeSites.length === 0) {
+            document.getElementById('report-output').innerText = "當日無任何案場有出工或施工紀錄。";
+            return;
+        }
+
+        let amReports = [];
+        let pmReports = [];
+
+        activeSites.forEach(({ site, dData }) => {
+            let amStr = dData.amWorkers.length > 0 ? dData.amWorkers.join('、') : '無';
+            let pmStr = dData.pmWorkers.length > 0 ? dData.pmWorkers.join('、') : '無';
+            let unworkedStr = dData.unworked.length > 0 ? dData.unworked.join('、') : '無';
+
+            amReports.push(
+`上午出工人員：共${dData.amWorkers.length}人（${amStr}），未出工人員：${unworkedStr}
+施作案場：${site.name}
+施作項目：${dData.amProject || '無'}`
+            );
+
+            pmReports.push(
+`下午出工人員：共${dData.pmWorkers.length}人（${pmStr}），未出工人員：${unworkedStr}
+施作案場：${site.name}
+施作項目：${dData.pmProject || '無'}`
+            );
+        });
+
+        const reportText = 
+`${fullDateStr}，上午出工：
+----------------------------------------
+${amReports.join('\n\n')}
+
+${fullDateStr}，下午出工：
+----------------------------------------
+${pmReports.join('\n\n')}`;
+
+        document.getElementById('report-output').innerText = reportText;
+    }
+
+    function copyReport() {
+        const text = document.getElementById('report-output').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('已成功複製回報內容至剪貼簿！');
+        });
+    }
+
+    function initLogPane() {
+        const select = document.getElementById('log-date-select');
+        select.innerHTML = '';
+        for (let i = 1; i <= 30; i++) {
+            let opt = document.createElement('option');
+            opt.value = i;
+            opt.innerText = `${i}日`;
+            select.appendChild(opt);
+        }
+        select.value = 7;
+        initLogProjectSelect();
+        renderLogForm();
+    }
+
+    function initLogProjectSelect() {
+        const projSelect = document.getElementById('log-project-select');
+        projSelect.innerHTML = '';
+        let monthSites = appData[currentMonth].sites;
+        monthSites.forEach(site => {
+            let opt = document.createElement('option');
+            opt.value = site.id;
+            opt.innerText = site.title;
+            projSelect.appendChild(opt);
+        });
+    }
+
+    function onLogProjectChange() {
+        let dayIndex = parseInt(document.getElementById('log-date-select').value);
+        let projSelectId = document.getElementById('log-project-select').value;
+        if (!appData[currentMonth].logs[projSelectId]) {
+            appData[currentMonth].logs[projSelectId] = {};
+        }
+        let logsObj = appData[currentMonth].logs[projSelectId];
+        if (!logsObj[dayIndex]) {
+            let siteWorkers = appData[currentMonth].data[projSelectId] ? appData[currentMonth].data[projSelectId].days[dayIndex - 1] : null;
+            let workersSet = siteWorkers ? new Set([...siteWorkers.amWorkers, ...siteWorkers.pmWorkers]) : new Set();
+            logsObj[dayIndex] = {
+                selectedSiteId: projSelectId,
+                weatherAm: "晴",
+                weatherPm: "晴",
+                workersSummary: workersSet.size > 0 ? Array.from(workersSet).join('、') : '',
+                progress: "",
+                trades: {},
+                sampling: "",
+                notice: "",
+                important: ""
+            };
+        }
+        logsObj[dayIndex].selectedSiteId = projSelectId;
+        saveDB();
+        renderLogForm();
+    }
+
+    function renderLogForm() {
+        let dayIndex = parseInt(document.getElementById('log-date-select').value);
+        let projSelect = document.getElementById('log-project-select');
+        
+        let monthSites = appData[currentMonth].sites;
+        if (!projSelect.value || !monthSites.some(s => s.id === projSelect.value)) {
+            projSelect.value = monthSites[0].id;
+        }
+        let siteId = projSelect.value;
+
+        if (!appData[currentMonth].logs[siteId]) {
+            appData[currentMonth].logs[siteId] = {};
+        }
+        let logsObj = appData[currentMonth].logs[siteId];
+        if (!logsObj[dayIndex]) {
+            let siteData = appData[currentMonth].data[siteId];
+            let dayData = siteData ? siteData.days[dayIndex - 1] : null;
+            let workersSet = dayData ? new Set([...dayData.amWorkers, ...dayData.pmWorkers]) : new Set();
+            logsObj[dayIndex] = {
+                selectedSiteId: siteId,
+                weatherAm: "晴",
+                weatherPm: "晴",
+                workersSummary: workersSet.size > 0 ? Array.from(workersSet).join('、') : '',
+                progress: "",
+                trades: {},
+                sampling: "",
+                notice: "",
+                important: ""
+            };
+        }
+        let log = logsObj[dayIndex];
+        log.selectedSiteId = siteId;
+
+        // 自動計算並固定填入禮拜幾
+        let calculatedWeekday = getWeekdayString(currentMonth, dayIndex);
+        document.getElementById('log-weekday').value = calculatedWeekday;
+
+        document.getElementById('log-weather-am').value = log.weatherAm || "晴";
+        document.getElementById('log-weather-pm').value = log.weatherPm || "晴";
+        document.getElementById('log-progress').value = log.progress || "";
+        document.getElementById('log-sampling').value = log.sampling || "";
+        document.getElementById('log-notice').value = log.notice || "";
+        document.getElementById('log-important').value = log.important || "";
+
+        if (log.workersSummary === undefined || log.workersSummary === '') {
+            let siteData = appData[currentMonth].data[siteId];
+            let dayData = siteData ? siteData.days[dayIndex - 1] : null;
+            let workersSet = dayData ? new Set([...dayData.amWorkers, ...dayData.pmWorkers]) : new Set();
+            log.workersSummary = workersSet.size > 0 ? Array.from(workersSet).join('、') : '';
+        }
+        document.getElementById('log-workers-summary').value = log.workersSummary;
+
+        const grid = document.getElementById('log-trades-grid');
+        grid.innerHTML = '';
+        tradeList.forEach(trade => {
+            let val = (log.trades && log.trades[trade]) !== undefined ? log.trades[trade] : '';
+            let div = document.createElement('div');
+            div.className = 'log-field';
+            div.innerHTML = `<span>${trade}</span><input type="text" data-trade="${trade}" value="${val}" oninput="updateTradeCount('${trade}', this.value)">`;
+            grid.appendChild(div);
+        });
+
+        generateLogReportText();
+    }
+
+    function updateTradeCount(trade, val) {
+        let dayIndex = parseInt(document.getElementById('log-date-select').value);
+        let siteId = document.getElementById('log-project-select').value;
+        let logsObj = appData[currentMonth].logs[siteId];
+        if (!logsObj[dayIndex].trades) logsObj[dayIndex].trades = {};
+        logsObj[dayIndex].trades[trade] = val;
+        saveDB();
+        generateLogReportText();
+    }
+
+    function saveLogData() {
+        let dayIndex = parseInt(document.getElementById('log-date-select').value);
+        let siteId = document.getElementById('log-project-select').value;
+        let logsObj = appData[currentMonth].logs[siteId];
+        let log = logsObj[dayIndex];
+
+        log.weatherAm = document.getElementById('log-weather-am').value;
+        log.weatherPm = document.getElementById('log-weather-pm').value;
+        log.workersSummary = document.getElementById('log-workers-summary').value;
+        log.progress = document.getElementById('log-progress').value;
+        log.sampling = document.getElementById('log-sampling').value;
+        log.notice = document.getElementById('log-notice').value;
+        log.important = document.getElementById('log-important').value;
+
+        saveDB();
+        generateLogReportText();
+    }
+
+    function generateLogReportText() {
+        let dayIndex = parseInt(document.getElementById('log-date-select').value);
+        let siteId = document.getElementById('log-project-select').value;
+        let log = appData[currentMonth].logs[siteId] ? appData[currentMonth].logs[siteId][dayIndex] : null;
+        if (!log) return;
+
+        let projSelect = document.getElementById('log-project-select');
+        let projectTitle = projSelect.options[projSelect.selectedIndex] ? projSelect.options[projSelect.selectedIndex].text : '';
+        let workersSummary = document.getElementById('log-workers-summary').value;
+        let weekdayStr = getWeekdayString(currentMonth, dayIndex);
+
+        let tradesText = '';
+        tradeList.forEach(t => {
+            let count = (log.trades && log.trades[t]) ? log.trades[t] : '';
+            tradesText += `${t}-${count}人\n`;
+        });
+
+        const text = 
+`工程名稱：${projectTitle}
+
+日期:${currentMonth}${dayIndex}日 ${weekdayStr}
+天氣:上午:${log.weatherAm}、下午:${log.weatherPm}
+
+🚧出工人員：
+${workersSummary}
+
+今日施工進度⬇️
+${log.progress}
+
+出工人數：
+${tradesText.trim()}
+🌟施工取樣試驗紀錄：${log.sampling}
+🌟通知協力廠商辦理事項：${log.notice}
+🌟重要事項紀錄：${log.important}`;
+
+        document.getElementById('log-text-output').innerText = text;
+    }
+
+    function copyLogReport() {
+        const text = document.getElementById('log-text-output').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('已成功複製詳細施工日誌至剪貼簿！');
+        });
+    }
+
+    function renderExportPreview() {
+        let container = document.getElementById('export-preview-table');
+        let monthSites = appData[currentMonth].sites;
+        let monthDataObj = appData[currentMonth].data;
+
+        let html = `<h3>${currentMonth} 總表預覽 (含所有案場彙整)</h3>`;
+        monthSites.forEach(site => {
+            let siteData = monthDataObj[site.id];
+            html += `<h4 style="margin-top:20px; color:#2d3748; background:#edf2f7; padding:8px;">案場：${site.name}</h4>`;
+            html += `<table><thead><tr><th>日期</th><th>上午出工人數</th><th>上午出工名單</th><th>上午施工項目</th><th>下午出工人數</th><th>下午出工名單</th><th>下午施工項目</th><th>未出工人員</th><th>備註</th></tr></thead><tbody>`;
+            siteData.days.forEach(d => {
+                html += `<tr>
+                    <td>${currentMonth}${d.dateStr}</td>
+                    <td>${d.amWorkers.length}人</td>
+                    <td>${d.amWorkers.join('、')}</td>
+                    <td>${d.amProject || ''}</td>
+                    <td>${d.pmWorkers.length}人</td>
+                    <td>${d.pmWorkers.join('、')}</td>
+                    <td>${d.pmProject || ''}</td>
+                    <td>${d.unworked.join('、')}</td>
+                    <td>${d.note || ''}</td>
+                </tr>`;
+            });
+            html += `</tbody></table>`;
+        });
+        container.innerHTML = html;
+    }
+
+    exportToExcel = function() {
+        let wb = XLSX.utils.book_new();
+        let monthSites = appData[currentMonth].sites;
+        let monthDataObj = appData[currentMonth].data;
+
+        monthSites.forEach(site => {
+            let siteData = monthDataObj[site.id];
+            let rows = [];
+            rows.push([`${currentMonth} - ${site.name} 工程出工人數統計表`]);
+            rows.push([]);
+            rows.push(['項次', '日期', '上午出工人數', '上午出工人員', '上午施工項目', '下午出工人數', '下午出工人員', '下午施工項目', '未出工人員', '備註']);
+
+            siteData.days.forEach(d => {
+                rows.push([
+                    d.dayIndex, `${currentMonth}${d.dateStr}`,
+                    d.amWorkers.length, d.amWorkers.join('、'), d.amProject || '',
+                    d.pmWorkers.length, d.pmWorkers.join('、'), d.pmProject || '',
+                    d.unworked.join('、'), d.note || ''
+                ]);
+            });
+
+            let ws = XLSX.utils.aoa_to_sheet(rows);
+            ws['!cols'] = [{wch: 6}, {wch: 15}, {wch: 12}, {wch: 25}, {wch: 20}, {wch: 12}, {wch: 25}, {wch: 20}, {wch: 20}, {wch: 20}];
+            let sheetName = site.name.replace(/[:\\/?*\[\]]/g, "_");
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        });
+
+        XLSX.writeFile(wb, `工程出工人數統計總表_${currentMonth}.xlsx`);
+    };
+
+    initUI();
+</script>
+
+</body>
+</html>
