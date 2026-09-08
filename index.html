@@ -69,6 +69,9 @@
         .btn-success:hover { background-color: #2f855a; }
         .btn-cloud { background-color: #d69e2e; color: white; font-weight: bold; }
         .btn-cloud:hover { background-color: #b7791f; }
+        .btn-purple { background-color: #805ad5; color: white; }
+        .btn-purple:hover { background-color: #6b46c1; }
+        .btn-sm { padding: 4px 10px; font-size: 13px; }
 
         .cloud-sync-bar {
             background: #e6fffa;
@@ -81,6 +84,32 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
+        }
+
+        .project-meta-panel {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            padding: 14px 18px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+            align-items: center;
+            font-size: 14px;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        .meta-item input, .meta-item select {
+            padding: 6px 10px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 14px;
+            background: #fff;
         }
 
         .tabs {
@@ -218,6 +247,41 @@
     <div class="tabs" id="site-tabs"></div>
 
     <div id="site-content-pane">
+        <div class="project-meta-panel">
+            <div class="meta-item">
+                <label><strong>開工日期：</strong></label>
+                <input type="date" id="meta-start-date" onchange="updateProjectMeta()">
+            </div>
+            <div class="meta-item">
+                <label><strong>完工工期：</strong></label>
+                <span id="meta-end-date" style="font-weight: bold; color: #2b6cb0; background: #fff; padding: 5px 10px; border: 1px solid #cbd5e0; border-radius: 4px; display: inline-block; min-width: 110px;">自動計算</span>
+            </div>
+            <div class="meta-item">
+                <label><strong>工期：</strong></label>
+                <input type="number" id="meta-duration" min="1" value="0" style="width: 70px;" oninput="updateProjectMeta()">
+                <select id="meta-duration-type" onchange="updateProjectMeta()">
+                    <option value="日曆天">日曆天</option>
+                    <option value="工作天">工作天</option>
+                </select>
+            </div>
+            <div class="meta-item">
+                <label><strong>展延/不計工期：</strong></label>
+                <input type="text" id="meta-extension" placeholder="例: 颱風天停工2天" style="width: 130px;" oninput="updateProjectMeta()">
+            </div>
+            <div class="meta-item">
+                <label><strong>停工日期：</strong></label>
+                <input type="date" id="meta-suspension-date" onchange="updateProjectMeta()">
+            </div>
+            <div class="meta-item">
+                <label><strong>復工日期：</strong></label>
+                <input type="date" id="meta-resumption-date" onchange="updateProjectMeta()">
+            </div>
+            <div class="meta-item">
+                <label><strong>停工天數：</strong></label>
+                <span id="meta-suspension-days" style="font-weight: bold; color: #d97706; background: #fff; padding: 5px 10px; border: 1px solid #cbd5e0; border-radius: 4px; display: inline-block; min-width: 60px;">0 天</span>
+            </div>
+        </div>
+
         <div class="config-area">
             <label><strong>此工地可用工班/人員名單（用逗號分隔）：</strong></label>
             <input type="text" id="worker-list-input" placeholder="例如: 盧明君, 林智宇, 吳炫德, 邱龍展">
@@ -322,9 +386,12 @@
     <div id="export-content-pane" style="display: none;">
         <div class="sub-container">
             <h2 style="color: #805ad5; margin-top:0;">📊 全案場 Excel 總表匯出與總覽</h2>
-            <div style="margin: 20px 0;">
-                <button class="btn btn-success" style="font-size: 18px; padding: 12px 25px; background-color: #805ad5;" onclick="exportToExcel()">📥 匯出當月完整總表 Excel 檔案</button>
+            
+            <div style="margin: 20px 0; display: flex; gap: 15px; flex-wrap: wrap;">
+                <button class="btn btn-success" style="font-size: 16px; padding: 10px 20px;" onclick="exportToExcel()">📥 匯出全部案場當月總表</button>
+                <button class="btn btn-purple" style="font-size: 16px; padding: 10px 20px;" onclick="exportYearlyToExcel()">📈 匯出全部案場當年度總表（含總施作天數）</button>
             </div>
+
             <div id="export-preview-table" class="table-responsive"></div>
         </div>
     </div>
@@ -347,7 +414,7 @@
         let db = {};
         let months = ['115年9月', '115年10月'];
         months.forEach(m => {
-            db[m] = { sites: JSON.parse(JSON.stringify(defaultSites)), data: {}, logs: {} };
+            db[m] = { sites: JSON.parse(JSON.stringify(defaultSites)), data: {}, logs: {}, meta: {} };
             defaultSites.forEach(site => {
                 let daysCount = m.includes('9月') ? 30 : 31;
                 let dayList = [];
@@ -358,6 +425,7 @@
                 }
                 db[m].data[site.id] = { workers: [...defaultWorkers], days: dayList };
                 db[m].logs[site.id] = siteLogs;
+                db[m].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: '', suspensionDate: '', resumptionDate: '' };
             });
         });
         return db;
@@ -430,7 +498,7 @@
     function switchMonth(month) {
         currentMonth = month;
         if (!appData[currentMonth]) {
-            appData[currentMonth] = { sites: JSON.parse(JSON.stringify(defaultSites)), data: {}, logs: {} };
+            appData[currentMonth] = { sites: JSON.parse(JSON.stringify(defaultSites)), data: {}, logs: {}, meta: {} };
             defaultSites.forEach(site => {
                 let dayList = []; let siteLogs = {};
                 for (let i = 1; i <= 30; i++) {
@@ -439,6 +507,7 @@
                 }
                 appData[currentMonth].data[site.id] = { workers: [...defaultWorkers], days: dayList };
                 appData[currentMonth].logs[site.id] = siteLogs;
+                appData[currentMonth].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: '', suspensionDate: '', resumptionDate: '' };
             });
             saveDB();
         }
@@ -455,7 +524,7 @@
         if (!y || !mo) { alert('請完整輸入年與月'); return; }
         let val = y + mo;
         if (appData[val]) { alert('此年月已存在！'); return; }
-        appData[val] = { sites: JSON.parse(JSON.stringify(defaultSites)), data: {}, logs: {} };
+        appData[val] = { sites: JSON.parse(JSON.stringify(defaultSites)), data: {}, logs: {}, meta: {} };
         defaultSites.forEach(site => {
             let dayList = []; let siteLogs = {};
             for (let i = 1; i <= 30; i++) {
@@ -464,6 +533,7 @@
             }
             appData[val].data[site.id] = { workers: [...defaultWorkers], days: dayList };
             appData[val].logs[site.id] = siteLogs;
+            appData[val].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: '', suspensionDate: '', resumptionDate: '' };
         });
         saveDB(); currentMonth = val;
         document.getElementById('new-year-input').value = '';
@@ -485,6 +555,8 @@
         }
         appData[currentMonth].data[siteId] = { workers: [...defaultWorkers], days: dayList };
         appData[currentMonth].logs[siteId] = siteLogs;
+        if (!appData[currentMonth].meta) appData[currentMonth].meta = {};
+        appData[currentMonth].meta[siteId] = { startDate: '', duration: 0, durationType: '日曆天', extension: '', suspensionDate: '', resumptionDate: '' };
         saveDB(); currentSiteId = siteId;
         document.getElementById('new-site-name').value = '';
         initUI();
@@ -498,6 +570,7 @@
         appData[currentMonth].sites = monthSites.filter(s => s.id !== siteId);
         delete appData[currentMonth].data[siteId];
         delete appData[currentMonth].logs[siteId];
+        if (appData[currentMonth].meta) delete appData[currentMonth].meta[siteId];
         saveDB(); currentSiteId = appData[currentMonth].sites[0].id;
         initUI();
     }
@@ -594,6 +667,21 @@
     function renderSitePane() {
         let siteData = appData[currentMonth].data[currentSiteId];
         document.getElementById('worker-list-input').value = siteData.workers.join(', ');
+
+        if (!appData[currentMonth].meta) appData[currentMonth].meta = {};
+        if (!appData[currentMonth].meta[currentSiteId]) {
+            appData[currentMonth].meta[currentSiteId] = { startDate: '', duration: 0, durationType: '日曆天', extension: '', suspensionDate: '', resumptionDate: '' };
+        }
+        let meta = appData[currentMonth].meta[currentSiteId];
+        document.getElementById('meta-start-date').value = meta.startDate || '';
+        document.getElementById('meta-duration').value = meta.duration || 0;
+        document.getElementById('meta-duration-type').value = meta.durationType || '日曆天';
+        document.getElementById('meta-extension').value = meta.extension || '';
+        document.getElementById('meta-suspension-date').value = meta.suspensionDate || '';
+        document.getElementById('meta-resumption-date').value = meta.resumptionDate || '';
+
+        calculateProjectMetaValues(meta);
+
         const tbody = document.getElementById('table-body');
         tbody.innerHTML = '';
 
@@ -612,6 +700,47 @@
             tbody.appendChild(tr);
         });
         initColumnResizer();
+    }
+
+    function calculateProjectMetaValues(meta) {
+        let suspensionDays = 0;
+        if (meta.suspensionDate && meta.resumptionDate) {
+            let d1 = new Date(meta.suspensionDate);
+            let d2 = new Date(meta.resumptionDate);
+            let diffTime = d2 - d1;
+            let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays >= 0) {
+                suspensionDays = diffDays;
+            }
+        }
+        document.getElementById('meta-suspension-days').innerText = suspensionDays + " 天";
+
+        if (meta.startDate && meta.duration > 0) {
+            let startD = new Date(meta.startDate);
+            let totalDaysToAdd = parseInt(meta.duration) + suspensionDays;
+            startD.setDate(startD.getDate() + totalDaysToAdd);
+            let y = startD.getFullYear();
+            let m = String(startD.getMonth() + 1).padStart(2, '0');
+            let d = String(startD.getDate()).padStart(2, '0');
+            document.getElementById('meta-end-date').innerText = `${y}-${m}-${d}`;
+        } else {
+            document.getElementById('meta-end-date').innerText = "自動計算";
+        }
+    }
+
+    function updateProjectMeta() {
+        if (!appData[currentMonth].meta) appData[currentMonth].meta = {};
+        let meta = {
+            startDate: document.getElementById('meta-start-date').value,
+            duration: parseInt(document.getElementById('meta-duration').value) || 0,
+            durationType: document.getElementById('meta-duration-type').value,
+            extension: document.getElementById('meta-extension').value,
+            suspensionDate: document.getElementById('meta-suspension-date').value,
+            resumptionDate: document.getElementById('meta-resumption-date').value
+        };
+        appData[currentMonth].meta[currentSiteId] = meta;
+        calculateProjectMetaValues(meta);
+        saveDB();
     }
 
     function initColumnResizer() {
@@ -771,6 +900,16 @@
         let pTitle = document.getElementById('log-project-select').selectedOptions[0].text;
         let tText = tradeList.map(t => `${t}-${log.trades && log.trades[t] || ''}人`).join('\n');
         
+        let rawProgress = log.progress || '';
+        let lines = rawProgress.split('\n');
+        let circledNums = ['➊', '➋', '➌', '➍', '➎', '➏', '➐', '➑', '➒', '➓'];
+        let formattedProgress = lines.map((line, idx) => {
+            let cleanLine = line.replace(/^[➊➋➌➍➎➏➐➑➒➓1-9][\.、\s]*/, '').trim();
+            if (!cleanLine) return '';
+            let numSymbol = circledNums[idx] || `(${idx + 1})`;
+            return `${numSymbol}${cleanLine}`;
+        }).filter(l => l !== '').join('\n');
+
         document.getElementById('log-text-output').innerText = 
 `工程名稱：${pTitle}
 日期:${currentMonth}${dayIndex}日 ${getWeekdayString(currentMonth, dayIndex)}
@@ -780,7 +919,7 @@
 ${log.workersSummary}
 
 今日施工進度⬇️
-${log.progress}
+${formattedProgress}
 
 出工人數：
 ${tText}
@@ -795,10 +934,20 @@ ${tText}
 
     function renderExportPreview() {
         let container = document.getElementById('export-preview-table');
-        let html = `<h3>${currentMonth} 總表預覽</h3>`;
+        let html = `<h3 style="padding-left: 5px; margin-bottom: 5px;">${currentMonth} 總表預覽</h3>`;
+        
         appData[currentMonth].sites.forEach(site => {
             let sData = appData[currentMonth].data[site.id];
-            html += `<h4>${site.name}</h4><table><thead><tr><th>日期</th><th>上午人數</th><th>下午人數</th><th>備註</th></tr></thead><tbody>`;
+            html += `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding-left: 5px; padding-right: 5px;">
+                    <h4 style="color: #2d3748; margin: 0;">${site.name}</h4>
+                    <div>
+                        <button class="btn btn-success btn-sm" onclick="exportSingleSiteMonthly('${site.id}')">📥 下載此案場當月 Excel</button>
+                        <button class="btn btn-purple btn-sm" onclick="exportSingleSiteYearly('${site.id}')">📈 下載此案場年度 Excel</button>
+                    </div>
+                </div>
+            `;
+            html += `<table><thead><tr><th>日期</th><th>上午人數</th><th>下午人數</th><th>備註</th></tr></thead><tbody>`;
             sData.days.forEach(d => {
                 html += `<tr><td>${currentMonth}${d.dateStr}</td><td>${d.amWorkers.length}人</td><td>${d.pmWorkers.length}人</td><td>${d.note || ''}</td></tr>`;
             });
@@ -807,17 +956,140 @@ ${tText}
         container.innerHTML = html;
     }
 
-    exportToExcel = function() {
+    // 📥 匯出全部案場當月總表
+    function exportToExcel() {
         let wb = XLSX.utils.book_new();
         appData[currentMonth].sites.forEach(site => {
-            let rows = [[`${currentMonth} - ${site.name} 總表`], [], ['項次', '日期', '上午人數', '上午名單', '下午人數', '下午名單', '備註']];
+            let meta = appData[currentMonth].meta && appData[currentMonth].meta[site.id] ? appData[currentMonth].meta[site.id] : {};
+            let rows = [
+                [`${currentMonth} - ${site.name} 總表`],
+                [`開工日期: ${meta.startDate || '未填'}  |  完工工期: 自動計算  |  工期: ${meta.duration || 0} ${meta.durationType || '日曆天'}  |  展延: ${meta.extension || '無'}  |  停工: ${meta.suspensionDate || '無'}  |  復工: ${meta.resumptionDate || '無'}`],
+                [],
+                ['項次', '日期', '上午人數', '上午名單', '下午人數', '下午名單', '備註']
+            ];
             appData[currentMonth].data[site.id].days.forEach(d => {
                 rows.push([d.dayIndex, `${currentMonth}${d.dateStr}`, d.amWorkers.length, d.amWorkers.join('、'), d.pmWorkers.length, d.pmWorkers.join('、'), d.note || '']);
             });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), site.name);
         });
-        XLSX.writeFile(wb, `總表_${currentMonth}.xlsx`);
-    };
+        XLSX.writeFile(wb, `全部案場工程總表_${currentMonth}.xlsx`);
+    }
+
+    // 📥 獨立下載單一案場當月 Excel
+    function exportSingleSiteMonthly(siteId) {
+        let site = appData[currentMonth].sites.find(s => s.id === siteId);
+        if (!site) return;
+        let wb = XLSX.utils.book_new();
+        let meta = appData[currentMonth].meta && appData[currentMonth].meta[site.id] ? appData[currentMonth].meta[site.id] : {};
+        let rows = [
+            [`${currentMonth} - ${site.name} 總表`],
+            [`開工日期: ${meta.startDate || '未填'}  |  完工工期: 自動計算  |  工期: ${meta.duration || 0} ${meta.durationType || '日曆天'}  |  展延: ${meta.extension || '無'}  |  停工: ${meta.suspensionDate || '無'}  |  復工: ${meta.resumptionDate || '無'}`],
+            [],
+            ['項次', '日期', '上午人數', '上午名單', '下午人數', '下午名單', '備註']
+        ];
+        appData[currentMonth].data[site.id].days.forEach(d => {
+            rows.push([d.dayIndex, `${currentMonth}${d.dateStr}`, d.amWorkers.length, d.amWorkers.join('、'), d.pmWorkers.length, d.pmWorkers.join('、'), d.note || '']);
+        });
+        let ws = XLSX.utils.aoa_to_sheet(rows);
+        XLSX.utils.book_append_sheet(wb, ws, site.name);
+        XLSX.writeFile(wb, `${site.name}_工程總表_${currentMonth}.xlsx`);
+    }
+
+    // 📈 匯出全部案場當年度總表
+    function exportYearlyToExcel() {
+        let yearMatch = currentMonth.match(/(\d+)年/);
+        if (!yearMatch) { alert('無法辨識當前年份！'); return; }
+        let targetYear = yearMatch[1] + '年';
+        let wb = XLSX.utils.book_new();
+        let allMonths = Object.keys(appData).filter(m => m.startsWith(targetYear));
+        
+        let siteMap = {};
+        allMonths.forEach(m => {
+            appData[m].sites.forEach(s => {
+                if (!siteMap[s.id]) siteMap[s.id] = s.name;
+            });
+        });
+
+        Object.keys(siteMap).forEach(siteId => {
+            let siteName = siteMap[siteId];
+            let rows = [[`${targetYear} ${siteName} 年度出工人數統計與施工總表`], []];
+            let totalWorkDays = 0;
+
+            allMonths.forEach(m => {
+                let monthData = appData[m];
+                if (monthData && monthData.data && monthData.data[siteId]) {
+                    let sData = monthData.data[siteId];
+                    let meta = monthData.meta && monthData.meta[siteId] ? monthData.meta[siteId] : {};
+                    rows.push([`${m} 統計明細 (開工: ${meta.startDate || '未填'}, 工期: ${meta.duration || 0} ${meta.durationType || '日曆天'})`]);
+                    rows.push(['項次', '日期', '上午人數', '上午名單', '上午施工項目', '下午人數', '下午名單', '下午施工項目', '未出工人員', '備註']);
+                    
+                    sData.days.forEach(d => {
+                        let hasWorked = d.amWorkers.length > 0 || d.pmWorkers.length > 0 || (d.amProject && d.amProject.trim()) || (d.pmProject && d.pmProject.trim());
+                        if (hasWorked) totalWorkDays++;
+                        rows.push([
+                            d.dayIndex, `${m}${d.dateStr}`,
+                            d.amWorkers.length, d.amWorkers.join('、'), d.pmWorkers.length, d.pmWorkers.join('、'), d.note || ''
+                        ]);
+                    });
+                    rows.push([]);
+                }
+            });
+
+            rows.splice(2, 0, ['🌟 年度總結算：', `此案場在 ${targetYear} 總共施作天數： ${totalWorkDays} 天`]);
+            rows.splice(3, 0, []);
+
+            let ws = XLSX.utils.aoa_to_sheet(rows);
+            XLSX.utils.book_append_sheet(wb, ws, siteName.replace(/[:\\/?*\[\]]/g, "_"));
+        });
+
+        XLSX.writeFile(wb, `全部案場工程年度總表_${targetYear}.xlsx`);
+    }
+
+    // 📈 獨立下載單一案場年度 Excel
+    function exportSingleSiteYearly(siteId) {
+        let yearMatch = currentMonth.match(/(\d+)年/);
+        if (!yearMatch) { alert('無法辨識當前年份！'); return; }
+        let targetYear = yearMatch[1] + '年';
+        let allMonths = Object.keys(appData).filter(m => m.startsWith(targetYear));
+        
+        let siteName = "";
+        for (let m of allMonths) {
+            let found = appData[m].sites.find(s => s.id === siteId);
+            if (found) { siteName = found.name; break; }
+        }
+        if (!siteName) { alert('找不到此案場資料'); return; }
+
+        let wb = XLSX.utils.book_new();
+        let rows = [[`${targetYear} ${siteName} 年度出工人數統計與施工總表`], []];
+        let totalWorkDays = 0;
+
+        allMonths.forEach(m => {
+            let monthData = appData[m];
+            if (monthData && monthData.data && monthData.data[siteId]) {
+                let sData = monthData.data[siteId];
+                let meta = monthData.meta && monthData.meta[siteId] ? monthData.meta[siteId] : {};
+                rows.push([`${m} 統計明細 (開工: ${meta.startDate || '未填'}, 工期: ${meta.duration || 0} ${meta.durationType || '日曆天'})`]);
+                rows.push(['項次', '日期', '上午人數', '上午名單', '下午人數', '下午名單', '備註']);
+                
+                sData.days.forEach(d => {
+                    let hasWorked = d.amWorkers.length > 0 || d.pmWorkers.length > 0 || (d.amProject && d.amProject.trim()) || (d.pmProject && d.pmProject.trim());
+                    if (hasWorked) totalWorkDays++;
+                    rows.push([
+                        d.dayIndex, `${m}${d.dateStr}`,
+                        d.amWorkers.length, d.amWorkers.join('、'), d.pmWorkers.length, d.pmWorkers.join('、'), d.note || ''
+                    ]);
+                });
+                rows.push([]);
+            }
+        });
+
+        rows.splice(2, 0, ['🌟 年度總結算：', `此案場在 ${targetYear} 總共施作天數： ${totalWorkDays} 天`]);
+        rows.splice(3, 0, []);
+
+        let ws = XLSX.utils.aoa_to_sheet(rows);
+        XLSX.utils.book_append_sheet(wb, ws, siteName.replace(/[:\\/?*\[\]]/g, "_"));
+        XLSX.writeFile(wb, `${siteName}_工程年度總表_${targetYear}.xlsx`);
+    }
 
     initUI();
 </script>
