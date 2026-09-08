@@ -798,26 +798,56 @@
         let dayData = monthDataObj[monthSites[0].id].days[selectIndex];
         let fullDateStr = `${currentMonth}${dayData.dateStr}`;
 
-        let activeSites = [];
+        let activeSitesAm = [];
+        let activeSitesPm = [];
+
         monthSites.forEach(site => {
             let sData = monthDataObj[site.id];
             if (!sData) return;
             let dData = sData.days[selectIndex];
-            if (dData.amWorkers.length > 0 || dData.pmWorkers.length > 0 || (dData.amProject && dData.amProject.trim()) || (dData.pmProject && dData.pmProject.trim())) {
-                activeSites.push({ site, dData });
-            }
+            
+            let hasAm = dData.amWorkers.length > 0 || (dData.amProject && dData.amProject.trim() !== '');
+            let hasPm = dData.pmWorkers.length > 0 || (dData.pmProject && dData.pmProject.trim() !== '');
+
+            if (hasAm) activeSitesAm.push({ site, dData });
+            if (hasPm) activeSitesPm.push({ site, dData });
         });
 
-        document.getElementById('detected-sites-tag').innerText = activeSites.length > 0 ? activeSites.map(i => i.site.name).join('、') : "（尚無紀錄）";
-        if (activeSites.length === 0) { document.getElementById('report-output').innerText = "當日無出工紀錄。"; return; }
+        // 智慧偵測標籤（有出工的案場才顯示）
+        let allActiveNames = Array.from(new Set([...activeSitesAm.map(i => i.site.name), ...activeSitesPm.map(i => i.site.name)]));
+        document.getElementById('detected-sites-tag').innerText = allActiveNames.length > 0 ? allActiveNames.join('、') : "（尚無紀錄）";
 
-        let amR = [], pmR = [];
-        activeSites.forEach(({ site, dData }) => {
-            amR.push(`上午出工：共${dData.amWorkers.length}人（${dData.amWorkers.join('、') || '無'}），未出工：${dData.unworked.join('、') || '無'}\n案場：${site.name}\n項目：${dData.amProject || '無'}`);
-            pmR.push(`下午出工：共${dData.pmWorkers.length}人（${dData.pmWorkers.join('、') || '無'}），未出工：${dData.unworked.join('、') || '無'}\n案場：${site.name}\n項目：${dData.pmProject || '無'}`);
+        if (activeSitesAm.length === 0 && activeSitesPm.length === 0) {
+            document.getElementById('report-output').innerText = "當日無任何案場有出工紀錄。";
+            return;
+        }
+
+        let amR = [];
+        activeSitesAm.forEach(({ site, dData }) => {
+            let amStr = dData.amWorkers.length > 0 ? dData.amWorkers.join('、') : '無';
+            let unworkedStr = dData.unworked.length > 0 ? dData.unworked.join('、') : '無';
+            amR.push(
+`上午出工：共${dData.amWorkers.length}人（${amStr}），未出工：${unworkedStr}
+案場：${site.name}
+項目：${dData.amProject || '無'}`
+            );
         });
 
-        document.getElementById('report-output').innerText = `${fullDateStr}，上午：\n` + amR.join('\n\n') + `\n\n${fullDateStr}，下午：\n` + pmR.join('\n\n');
+        let pmR = [];
+        activeSitesPm.forEach(({ site, dData }) => {
+            let pmStr = dData.pmWorkers.length > 0 ? dData.pmWorkers.join('、') : '無';
+            let unworkedStr = dData.unworked.length > 0 ? dData.unworked.join('、') : '無';
+            pmR.push(
+`下午出工：共${dData.pmWorkers.length}人（${pmStr}），未出工：${unworkedStr}
+案場：${site.name}
+項目：${dData.pmProject || '無'}`
+            );
+        });
+
+        let reportText = `${fullDateStr}，上午：\n` + (amR.length > 0 ? amR.join('\n\n') : '無上午出工紀錄') + 
+                         `\n\n${fullDateStr}，下午：\n` + (pmR.length > 0 ? pmR.join('\n\n') : '無下午出工紀錄');
+
+        document.getElementById('report-output').innerText = reportText;
     }
 
     function copyReport() {
@@ -956,7 +986,6 @@ ${tText}
         container.innerHTML = html;
     }
 
-    // 📥 匯出全部案場當月總表
     function exportToExcel() {
         let wb = XLSX.utils.book_new();
         appData[currentMonth].sites.forEach(site => {
@@ -975,7 +1004,6 @@ ${tText}
         XLSX.writeFile(wb, `全部案場工程總表_${currentMonth}.xlsx`);
     }
 
-    // 📥 獨立下載單一案場當月 Excel
     function exportSingleSiteMonthly(siteId) {
         let site = appData[currentMonth].sites.find(s => s.id === siteId);
         if (!site) return;
@@ -995,7 +1023,6 @@ ${tText}
         XLSX.writeFile(wb, `${site.name}_工程總表_${currentMonth}.xlsx`);
     }
 
-    // 📈 匯出全部案場當年度總表
     function exportYearlyToExcel() {
         let yearMatch = currentMonth.match(/(\d+)年/);
         if (!yearMatch) { alert('無法辨識當前年份！'); return; }
@@ -1045,7 +1072,6 @@ ${tText}
         XLSX.writeFile(wb, `全部案場工程年度總表_${targetYear}.xlsx`);
     }
 
-    // 📈 獨立下載單一案場年度 Excel
     function exportSingleSiteYearly(siteId) {
         let yearMatch = currentMonth.match(/(\d+)年/);
         if (!yearMatch) { alert('無法辨識當前年份！'); return; }
