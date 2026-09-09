@@ -458,13 +458,10 @@
 
     let appData = JSON.parse(localStorage.getItem('construction_master_db_cloud')) || getInitialDB();
 
-    // 強制掃描並補上「保固中案場」分頁，保證絕對不會不見！
+    // 強制確保所有月份都擁有「保固中案場」分頁
     Object.keys(appData).forEach(m => {
-        if (!appData[m].sites) {
-            appData[m].sites = [];
-        }
-        let hasWarranty = appData[m].sites.some(s => s.id === 'warranty_pool');
-        if (!hasWarranty) {
+        if (!appData[m].sites) appData[m].sites = [];
+        if (!appData[m].sites.some(s => s.id === 'warranty_pool')) {
             appData[m].sites.push({ id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true });
         }
         if (!appData[m].warrantySubSites) appData[m].warrantySubSites = {};
