@@ -300,7 +300,7 @@
             <button class="btn btn-red" onclick="addNewMonth()">＋ 新增年月</button>
         </div>
         <div class="control-group">
-            <input type="text" id="new-site-name" placeholder="請輸入新案場名稱 (例如: 新市工地)" style="width: 240px;">
+            <input type="text" id="new-site-name" placeholder="請輸入新案場名稱" style="width: 200px;">
             <button class="btn btn-red" onclick="addNewSite()">＋ 新增案場</button>
         </div>
     </div>
@@ -410,15 +410,16 @@
         months.forEach(m => {
             db[m] = { 
                 sites: [
-                    { id: 'qigu', name: '七股', title: '臺南市七股區圖書館耐震補強工程' },
+                    { id: 'qigu', name: '七股', title: '七股區圖書館耐震補強工程' },
                     { id: 'beiliao', name: '北寮里活動中心', title: '南化區北寮里活動中心耐震補強工程' },
-                    { id: 'annan', name: '安南-溪頂', title: '臺南市安南區溪頂寮工程' },
+                    { id: 'annan', name: '安南-溪頂', title: '安南區溪頂寮工程' },
                     { id: 'company', name: '公司', title: '公司內部行政作業' },
                     { id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true }
                 ], 
                 data: {}, 
                 logs: {}, 
                 meta: {}, 
+                customSiteNames: {},
                 warrantySubSites: {
                     'warranty_pool': [
                         { id: 'sub_1', name: '某某學校維修案', date: '2026-09-09', workers: '盧明君', project: '保固修繕漏水', note: '已完成' }
@@ -451,6 +452,7 @@
                 db[m].data[site.id] = { workers: [...defaultWorkers], days: dayList };
                 db[m].logs[site.id] = siteLogs;
                 db[m].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
+                db[m].customSiteNames[site.id] = site.title; 
             });
         });
         return db;
@@ -458,12 +460,17 @@
 
     let appData = JSON.parse(localStorage.getItem('construction_master_db_cloud')) || getInitialDB();
 
-    // 強制確保所有月份都擁有「保固中案場」分頁
     Object.keys(appData).forEach(m => {
         if (!appData[m].sites) appData[m].sites = [];
         if (!appData[m].sites.some(s => s.id === 'warranty_pool')) {
             appData[m].sites.push({ id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true });
         }
+        if (!appData[m].customSiteNames) appData[m].customSiteNames = {};
+        appData[m].sites.forEach(s => {
+            if (!s.isWarrantyRoot && !appData[m].customSiteNames[s.id]) {
+                appData[m].customSiteNames[s.id] = s.title;
+            }
+        });
         if (!appData[m].warrantySubSites) appData[m].warrantySubSites = {};
         if (!appData[m].warrantySubSites['warranty_pool']) {
             appData[m].warrantySubSites['warranty_pool'] = [];
@@ -509,8 +516,16 @@
                     if (!appData[m].sites.some(s => s.id === 'warranty_pool')) {
                         appData[m].sites.push({ id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true });
                     }
+                    if (!appData[m].customSiteNames) appData[m].customSiteNames = {};
+                    appData[m].sites.forEach(s => {
+                        if (!s.isWarrantyRoot && !appData[m].customSiteNames[s.id]) {
+                            appData[m].customSiteNames[s.id] = s.title;
+                        }
+                    });
                     if (!appData[m].warrantySubSites) appData[m].warrantySubSites = {};
-                    if (!appData[m].warrantySubSites['warranty_pool']) appData[m].warrantySubSites['warranty_pool'] = [];
+                    if (!appData[m].warrantySubSites['warranty_pool']) {
+                        appData[m].warrantySubSites['warranty_pool'] = [];
+                    }
                 });
                 saveDB();
                 initUI();
@@ -549,12 +564,12 @@
         currentMonth = month;
         if (!appData[currentMonth]) {
             appData[currentMonth] = { sites: [
-                { id: 'qigu', name: '七股', title: '臺南市七股區圖書館耐震補強工程' },
+                { id: 'qigu', name: '七股', title: '七股區圖書館耐震補強工程' },
                 { id: 'beiliao', name: '北寮里活動中心', title: '南化區北寮里活動中心耐震補強工程' },
-                { id: 'annan', name: '安南-溪頂', title: '臺南市安南區溪頂寮工程' },
+                { id: 'annan', name: '安南-溪頂', title: '安南區溪頂寮工程' },
                 { id: 'company', name: '公司', title: '公司內部行政作業' },
                 { id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true }
-            ], data: {}, logs: {}, meta: {}, warrantySubSites: { 'warranty_pool': [] } };
+            ], data: {}, logs: {}, meta: {}, customSiteNames: {}, warrantySubSites: { 'warranty_pool': [] } };
             
             appData[currentMonth].sites.forEach(site => {
                 if (site.isWarrantyRoot) return;
@@ -566,6 +581,7 @@
                 appData[currentMonth].data[site.id] = { workers: [...defaultWorkers], days: dayList };
                 appData[currentMonth].logs[site.id] = siteLogs;
                 appData[currentMonth].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
+                appData[currentMonth].customSiteNames[site.id] = site.title;
             });
             saveDB();
         }
@@ -584,14 +600,14 @@
         if (appData[val]) { alert('此年月已存在！'); return; }
         
         let newSites = [
-            { id: 'qigu', name: '七股', title: '臺南市七股區圖書館耐震補強工程' },
+            { id: 'qigu', name: '七股', title: '七股區圖書館耐震補強工程' },
             { id: 'beiliao', name: '北寮里活動中心', title: '南化區北寮里活動中心耐震補強工程' },
-            { id: 'annan', name: '安南-溪頂', title: '臺南市安南區溪頂寮工程' },
+            { id: 'annan', name: '安南-溪頂', title: '安南區溪頂寮工程' },
             { id: 'company', name: '公司', title: '公司內部行政作業' },
             { id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true }
         ];
 
-        appData[val] = { sites: newSites, data: {}, logs: {}, meta: {}, warrantySubSites: { 'warranty_pool': [] } };
+        appData[val] = { sites: newSites, data: {}, logs: {}, meta: {}, customSiteNames: {}, warrantySubSites: { 'warranty_pool': [] } };
         newSites.forEach(site => {
             if (site.isWarrantyRoot) return;
             let dayList = []; let siteLogs = {};
@@ -602,6 +618,7 @@
             appData[val].data[site.id] = { workers: [...defaultWorkers], days: dayList };
             appData[val].logs[site.id] = siteLogs;
             appData[val].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
+            appData[val].customSiteNames[site.id] = site.title;
         });
         saveDB(); currentMonth = val;
         document.getElementById('new-year-input').value = '';
@@ -616,7 +633,7 @@
         let monthSites = appData[currentMonth].sites;
         if (monthSites.some(s => s.name === name)) { alert('名稱已存在！'); return; }
         
-        let newSiteObj = { id: siteId, name: name, title: `臺南市${name}工程` };
+        let newSiteObj = { id: siteId, name: name, title: name };
         let warrantyIdx = monthSites.findIndex(s => s.isWarrantyRoot);
         if (warrantyIdx !== -1) {
             monthSites.splice(warrantyIdx, 0, newSiteObj);
@@ -633,6 +650,8 @@
         appData[currentMonth].logs[siteId] = siteLogs;
         if (!appData[currentMonth].meta) appData[currentMonth].meta = {};
         appData[currentMonth].meta[siteId] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
+        if (!appData[currentMonth].customSiteNames) appData[currentMonth].customSiteNames = {};
+        appData[currentMonth].customSiteNames[siteId] = name;
         saveDB(); currentSiteId = siteId;
         document.getElementById('new-site-name').value = '';
         initUI();
@@ -652,6 +671,7 @@
         delete appData[currentMonth].data[siteId];
         delete appData[currentMonth].logs[siteId];
         if (appData[currentMonth].meta) delete appData[currentMonth].meta[siteId];
+        if (appData[currentMonth].customSiteNames) delete appData[currentMonth].customSiteNames[siteId];
         if (appData[currentMonth].warrantySubSites && appData[currentMonth].warrantySubSites[siteId]) {
             delete appData[currentMonth].warrantySubSites[siteId];
         }
@@ -667,11 +687,18 @@
             alert('此為固定案場，名稱無法修改！');
             return;
         }
-        let newName = prompt("請輸入新的案場名稱：", site.name);
+        let newName = prompt("請輸入新的分頁按鈕名稱：", site.name);
         if (!newName || !newName.trim()) return;
-        site.name = newName.trim();
-        site.title = `臺南市${site.name}工程`;
+        let clean = newName.trim();
+        site.name = clean;
         saveDB(); initUI();
+    }
+
+    // 獨立處理紅框輸入框，不再更動上方按鈕名稱
+    function updateCustomSiteName(val) {
+        if (!appData[currentMonth].customSiteNames) appData[currentMonth].customSiteNames = {};
+        appData[currentMonth].customSiteNames[currentSiteId] = val;
+        saveDB();
     }
 
     function initUI() {
@@ -773,6 +800,10 @@
             let subList = appData[currentMonth].warrantySubSites[currentSiteId];
 
             let html = `
+                <div style="font-size: 16px; font-weight: bold; color: #1e331e; margin-bottom: 12px; background: #b6d7a8; padding: 10px 15px; border-radius: 6px; border: 1px solid #93c47d; display: flex; align-items: center; gap: 10px;">
+                    <label><strong>案場名稱：</strong></label>
+                    <input type="text" value="${siteObj.name}" readonly style="padding: 6px 10px; font-size: 15px; border: 1px solid #93c47d; border-radius: 4px; width: 400px; background: #fff;">
+                </div>
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
                     <button class="btn btn-red" onclick="addWarrantySubRow()">＋ 新增</button>
                 </div>
@@ -821,8 +852,16 @@
             appData[currentMonth].meta[currentSiteId] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
         }
         let meta = appData[currentMonth].meta[currentSiteId];
+        
+        if (!appData[currentMonth].customSiteNames) appData[currentMonth].customSiteNames = {};
+        let currentCustomName = appData[currentMonth].customSiteNames[currentSiteId] !== undefined ? appData[currentMonth].customSiteNames[currentSiteId] : siteObj.title;
 
         let html = `
+            <div style="font-size: 16px; font-weight: bold; color: #1e331e; margin-bottom: 12px; background: #b6d7a8; padding: 10px 15px; border-radius: 6px; border: 1px solid #93c47d; display: flex; align-items: center; gap: 10px;">
+                <label><strong>案場名稱：</strong></label>
+                <input type="text" value="${currentCustomName}" oninput="updateCustomSiteName(this.value)" style="padding: 6px 10px; font-size: 15px; border: 1px solid #93c47d; border-radius: 4px; width: 400px; background: #fff;">
+            </div>
+
             <div class="project-meta-panel">
                 <div class="meta-item">
                     <label><strong>開工日期：</strong></label>
@@ -1216,6 +1255,10 @@
                 projSelect.add(new Option(s.title, s.id));
             }
         });
+
+        if (currentSiteId && currentSiteId !== 'report_tab' && currentSiteId !== 'log_tab' && currentSiteId !== 'export_tab') {
+            projSelect.value = currentSiteId;
+        }
     }
 
     function onLogProjectChange() { renderLogForm(); }
@@ -1280,9 +1323,11 @@
         let val = textarea.value;
         let lines = val.split('\n');
         let formatted = lines.map((line, idx) => {
-            let clean = line.replace(/^(\d+[\.、]\s*|[\u2460-\u2469]\s*)/, '').trim();
+            let clean = line.replace(/^(\d+[\.、]\s*|[\u2460-\u2469]\s*|[①-⑽]\s*)/, '').trim();
             if (!clean) return '';
-            return `${idx + 1}. ${clean}`;
+            let circleNums = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
+            let numSymbol = (idx < 10) ? circleNums[idx] : `${idx + 1}.`;
+            return `${numSymbol} ${clean}`;
         }).filter(l => l !== '').join('\n');
         
         textarea.value = formatted;
@@ -1300,9 +1345,11 @@
         let rawProgress = log.progress || '';
         let lines = rawProgress.split('\n');
         let formattedProgress = lines.map((line, idx) => {
-            let clean = line.replace(/^(\d+[\.、]\s*|[\u2460-\u2469]\s*)/, '').trim();
+            let clean = line.replace(/^(\d+[\.、]\s*|[\u2460-\u2469]\s*|[①-⑽]\s*)/, '').trim();
             if (!clean) return '';
-            return `${idx + 1}. ${clean}`;
+            let circleNums = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
+            let numSymbol = (idx < 10) ? circleNums[idx] : `${idx + 1}.`;
+            return `${numSymbol} ${clean}`;
         }).filter(l => l !== '').join('\n');
 
         document.getElementById('log-text-output').innerText = 
