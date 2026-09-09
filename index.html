@@ -13,22 +13,57 @@
             color: #333;
         }
         .container {
-            max-width: 1550px;
+            max-width: 1850px;
             margin: 0 auto;
             background: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        h1 {
-            text-align: center;
-            background-color: #55a630;
+        
+        /* 標題列：重點使用 #336666 與 #4F9D9D 雙色搭配 */
+        .header-banner {
+            background: linear-gradient(135deg, #336666 0%, #4F9D9D 100%);
             color: white;
-            padding: 15px;
+            padding: 16px 20px;
             border-radius: 6px;
             margin-bottom: 20px;
-            font-size: 24px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
         }
+        .header-row-1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .header-logo-area {
+            display: flex;
+            align-items: center;
+        }
+        .header-logo-area img {
+            height: 42px !important;
+            width: auto !important;
+            max-height: 42px !important;
+            object-fit: contain !important;
+            background: transparent !important;
+            padding: 0 !important;
+            display: block !important;
+        }
+        .header-row-1-title {
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .header-row-2-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            padding-top: 8px;
+            opacity: 0.98;
+        }
+
         .control-panel {
             display: flex;
             justify-content: space-between;
@@ -69,13 +104,12 @@
         .btn-success:hover { background-color: #2f855a; }
         .btn-cloud { background-color: #d69e2e; color: white; font-weight: bold; }
         .btn-cloud:hover { background-color: #b7791f; }
-        .btn-purple { background-color: #805ad5; color: white; }
-        .btn-purple:hover { background-color: #6b46c1; }
         .btn-sm { padding: 4px 10px; font-size: 13px; }
 
+        /* 雲端狀態列改為 #d9ead3 背景搭配微調邊框 */
         .cloud-sync-bar {
-            background: #e6fffa;
-            border: 1px solid #b2f5ea;
+            background: #d9ead3;
+            border: 1px solid #b6d7a8;
             padding: 10px 15px;
             border-radius: 6px;
             margin-bottom: 15px;
@@ -84,19 +118,22 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
+            color: #274027;
         }
 
+        /* 開工資訊面板改為 #b6d7a8 背景與對應邊框 */
         .project-meta-panel {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
+            background: #b6d7a8;
+            border: 1px solid #93c47d;
             padding: 14px 18px;
             border-radius: 6px;
             margin-bottom: 15px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 12px;
             align-items: center;
             font-size: 14px;
+            color: #1e331e;
         }
         .meta-item {
             display: flex;
@@ -106,7 +143,7 @@
         }
         .meta-item input, .meta-item select {
             padding: 6px 10px;
-            border: 1px solid #cbd5e0;
+            border: 1px solid #93c47d;
             border-radius: 4px;
             font-size: 14px;
             background: #fff;
@@ -134,13 +171,18 @@
             align-items: center;
             gap: 8px;
         }
-        .tab-btn.active { background-color: #55a630; color: white; }
-        .tab-btn.report-tab { background-color: #3182ce; color: white; }
-        .tab-btn.report-tab.active { background-color: #2b6cb0; }
-        .tab-btn.log-tab { background-color: #d69e2e; color: white; }
-        .tab-btn.log-tab.active { background-color: #b7791f; }
-        .tab-btn.export-tab { background-color: #805ad5; color: white; }
-        .tab-btn.export-tab.active { background-color: #553c9a; }
+        .tab-btn.active { background-color: #336666; color: white; }
+        
+        /* 依要求更新的 Tab 按鈕自訂顏色與文字顏色（確保對比清晰） */
+        .tab-btn.report-tab { background-color: #5B5B00; color: #fff; }
+        .tab-btn.report-tab.active { background-color: #454500; color: #fff; }
+
+        .tab-btn.log-tab { background-color: #81C0C0; color: #113333; }
+        .tab-btn.log-tab.active { background-color: #5FA5A5; color: #fff; }
+
+        .tab-btn.export-tab { background-color: #B9B9FF; color: #222255; }
+        .tab-btn.export-tab.active { background-color: #8E8EE0; color: #fff; }
+
         .close-site {
             background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer;
         }
@@ -163,9 +205,9 @@
         }
         th, td {
             border: 1px solid #ccc;
-            padding: 14px 10px;
+            padding: 12px 8px;
             text-align: center;
-            font-size: 15px;
+            font-size: 14px;
             position: relative;
         }
         th {
@@ -174,24 +216,30 @@
             position: sticky;
             top: 0;
             z-index: 10;
-            font-size: 16px;
+            font-size: 15px;
             user-select: none;
         }
         .resizer {
             position: absolute; top: 0; right: 0; width: 8px; cursor: col-resize; user-select: none; touch-action: none; height: 100%;
+            z-index: 15;
         }
         .resizer:hover, .resizing { background-color: #3182ce; }
         tr:nth-child(even) { background-color: #f8fafc; }
         textarea.resizable-box {
-            width: 95%; min-height: 45px; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 15px; resize: both;
+            width: 95%; min-height: 55px; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; resize: both;
+            text-align: left;
+            line-height: 1.4;
         }
         .worker-selector {
-            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;
+            display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center;
         }
         .worker-badge {
-            display: inline-flex; align-items: center; gap: 4px; background: #edf2f7; padding: 6px 10px; border-radius: 4px; font-size: 14px; cursor: pointer; border: 1px solid #cbd5e0;
+            display: inline-flex; align-items: center; gap: 3px; background: #edf2f7; padding: 5px 8px; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid #cbd5e0;
         }
         .worker-badge input { cursor: pointer; transform: scale(1.1); }
+        .unworked-display {
+            color: #e53e3e; font-weight: bold; background: #fff5f5; padding: 6px 8px; border-radius: 4px; border: 1px solid #fed7d7; display: inline-block; font-size: 13px;
+        }
         .report-section {
             background: #f1f5f9; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px solid #cbd5e0;
         }
@@ -199,8 +247,9 @@
         .report-box {
             background: #fff; padding: 15px; border: 1px solid #94a3b8; border-radius: 6px; white-space: pre-wrap; font-family: monospace; font-size: 15px; margin-bottom: 10px;
         }
+        /* 工地名單設定區塊改為 #93c47d 背景搭配柔和邊框 */
         .config-area {
-            margin-bottom: 15px; background: #fffbeb; padding: 12px; border: 1px solid #fde68a; border-radius: 4px; font-size: 15px;
+            margin-bottom: 15px; background: #93c47d; padding: 12px; border: 1px solid #b6d7a8; border-radius: 4px; font-size: 15px; color: #112611;
         }
         .config-area input { width: 320px; margin-left: 10px; }
         .sub-container { background: #fff; padding: 20px; border: 1px solid #cbd5e0; border-radius: 6px; }
@@ -217,11 +266,20 @@
 <body>
 
 <div class="container">
-    <h1 id="main-title">工程出工人數與施工日誌管理系統</h1>
+    <div class="header-banner">
+        <div class="header-row-1">
+            <div class="header-logo-area">
+                <img src="https://lh3.googleusercontent.com/d/1IwoAL8I7c54k6HiAMc7K4OHVYrn-iR9V" alt="翔奕營造 Logo" class="h-12 w-auto object-contain shrink-0 drop-shadow-sm">
+            </div>
+            <div class="header-row-1-title">出工人數統計</div>
+            <div style="width: 42px;"></div>
+        </div>
+        <div class="header-row-2-title" id="main-title">工程名稱</div>
+    </div>
 
     <div class="cloud-sync-bar">
         <div>
-            ☁️ <strong>雲端狀態：</strong> <span id="sync-status" style="color: #2b6cb0;">就緒（每次修改後請點擊儲存）</span>
+            ☁️ <strong>雲端狀態：</strong> <span id="sync-status" style="color: #1b381b;">就緒（每次修改後請點擊儲存）</span>
         </div>
         <div>
             <button class="btn btn-cloud" onclick="saveToCloud()">☁️ 儲存資料至雲端</button>
@@ -254,7 +312,7 @@
             </div>
             <div class="meta-item">
                 <label><strong>完工工期：</strong></label>
-                <span id="meta-end-date" style="font-weight: bold; color: #2b6cb0; background: #fff; padding: 5px 10px; border: 1px solid #cbd5e0; border-radius: 4px; display: inline-block; min-width: 110px;">自動計算</span>
+                <span id="meta-end-date" style="font-weight: bold; color: #1e331e; background: #fff; padding: 5px 10px; border: 1px solid #93c47d; border-radius: 4px; display: inline-block; min-width: 110px;">自動計算</span>
             </div>
             <div class="meta-item">
                 <label><strong>工期：</strong></label>
@@ -278,7 +336,7 @@
             </div>
             <div class="meta-item">
                 <label><strong>停工天數：</strong></label>
-                <span id="meta-suspension-days" style="font-weight: bold; color: #d97706; background: #fff; padding: 5px 10px; border: 1px solid #cbd5e0; border-radius: 4px; display: inline-block; min-width: 60px;">0 天</span>
+                <span id="meta-suspension-days" style="font-weight: bold; color: #78350f; background: #fff; padding: 5px 10px; border: 1px solid #93c47d; border-radius: 4px; display: inline-block; min-width: 60px;">0 天</span>
             </div>
         </div>
 
@@ -286,21 +344,25 @@
             <label><strong>此工地可用工班/人員名單（用逗號分隔）：</strong></label>
             <input type="text" id="worker-list-input" placeholder="例如: 盧明君, 林智宇, 吳炫德, 邱龍展">
             <button class="btn" onclick="updateWorkerList()">更新名單</button>
-            <span style="color: #666; font-size: 13px; margin-left: 15px;">💡 提示：記得填完後點擊上方「儲存資料至雲端」，其他人開啟時才會同步喔！</span>
+            <span style="color: #112611; font-size: 13px; margin-left: 15px;">💡 提示：記得填完後點擊上方「儲存資料至雲端」，其他人開啟時才會同步喔！</span>
         </div>
 
         <div class="table-responsive">
             <table id="main-table">
                 <thead>
                     <tr>
-                        <th style="width: 65px;">項次<div class="resizer"></div></th>
-                        <th style="width: 140px;">日期<div class="resizer"></div></th>
-                        <th style="width: 26%;">上午出工人員<div class="resizer"></div></th>
-                        <th style="width: 18%;">上午施工項目<div class="resizer"></div></th>
-                        <th style="width: 26%;">下午出工人員<div class="resizer"></div></th>
-                        <th style="width: 18%;">下午施工項目<div class="resizer"></div></th>
-                        <th style="width: 14%;">未出工人員<div class="resizer"></div></th>
-                        <th style="width: 14%;">備註<div class="resizer"></div></th>
+                        <th style="width: 55px;">項次<div class="resizer"></div></th>
+                        <th style="width: 110px;">日期<div class="resizer"></div></th>
+                        <th style="width: 20%;">上午出工人員<div class="resizer"></div></th>
+                        <th style="width: 14%;">上午施工項目<div class="resizer"></div></th>
+                        <th style="width: 11%;">上午報班時間<div class="resizer"></div></th>
+                        <th style="width: 13%;">上午報班照片<div class="resizer"></div></th>
+                        <th style="width: 20%;">下午出工人員<div class="resizer"></div></th>
+                        <th style="width: 14%;">下午施工項目<div class="resizer"></div></th>
+                        <th style="width: 11%;">下午報班時間<div class="resizer"></div></th>
+                        <th style="width: 13%;">下午報班照片<div class="resizer"></div></th>
+                        <th style="width: 12%;">未出工人員<div class="resizer"></div></th>
+                        <th style="width: 10%;">備註<div class="resizer"></div></th>
                     </tr>
                 </thead>
                 <tbody id="table-body"></tbody>
@@ -366,7 +428,7 @@
             </div>
             <div style="margin-bottom: 20px;">
                 <label style="display: block; margin-bottom: 5px;"><strong>今日施工進度⬇️：</strong></label>
-                <textarea id="log-progress" rows="3" oninput="saveLogData()" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;"></textarea>
+                <textarea id="log-progress" rows="3" oninput="autoNumberedProgress(this)" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;"></textarea>
             </div>
             <h3>📊 各工種出工人數細目：</h3>
             <div class="log-grid" id="log-trades-grid"></div>
@@ -401,10 +463,10 @@
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4rFaW0Suvyc0eaPaxISxNrJvEkJjmWdgM_Aqw2pFafvpy-uodbYA6z4Ia7cczzZNC/exec";
 
     const defaultSites = [
-        { id: 'qigu', name: '七股', title: '臺南市七股區圖書館耐震補強工程出工人數統計' },
+        { id: 'qigu', name: '七股', title: '臺南市七股區圖書館耐震補強工程' },
         { id: 'beiliao', name: '北寮里活動中心', title: '南化區北寮里活動中心耐震補強工程' },
-        { id: 'annan', name: '安南-溪頂', title: '臺南市安南區溪頂寮工程出工人數統計' },
-        { id: 'company', name: '公司', title: '公司內部出工統計' }
+        { id: 'annan', name: '安南-溪頂', title: '臺南市安南區溪頂寮工程' },
+        { id: 'company', name: '公司', title: '公司內部行政作業' }
     ];
 
     const defaultWorkers = ["盧明君", "林智宇", "吳炫德", "邱龍展"];
@@ -420,7 +482,21 @@
                 let dayList = [];
                 let siteLogs = {};
                 for (let i = 1; i <= daysCount; i++) {
-                    dayList.push({ dayIndex: i, dateStr: `${i}日`, amWorkers: [], amProject: '', pmWorkers: [], pmProject: '', unworked: [], note: '' });
+                    dayList.push({ 
+                        dayIndex: i, 
+                        dateStr: `${i}日`, 
+                        amWorkers: [], 
+                        amProject: '', 
+                        amTime: '', 
+                        amPhotoName: '', 
+                        amPhoto: '', 
+                        pmWorkers: [], 
+                        pmProject: '', 
+                        pmTime: '', 
+                        pmPhotoName: '', 
+                        pmPhoto: '', 
+                        note: '' 
+                    });
                     siteLogs[i] = { selectedSiteId: site.id, weatherAm: "晴", weatherPm: "晴", workersSummary: "", progress: "", trades: {}, sampling: "", notice: "", important: "" };
                 }
                 db[m].data[site.id] = { workers: [...defaultWorkers], days: dayList };
@@ -502,7 +578,7 @@
             defaultSites.forEach(site => {
                 let dayList = []; let siteLogs = {};
                 for (let i = 1; i <= 30; i++) {
-                    dayList.push({ dayIndex: i, dateStr: `${i}日`, amWorkers: [], amProject: '', pmWorkers: [], pmProject: '', unworked: [], note: '' });
+                    dayList.push({ dayIndex: i, dateStr: `${i}日`, amWorkers: [], amProject: '', amTime: '', amPhotoName: '', amPhoto: '', pmWorkers: [], pmProject: '', pmTime: '', pmPhotoName: '', pmPhoto: '', note: '' });
                     siteLogs[i] = { selectedSiteId: site.id, weatherAm: '晴', weatherPm: '晴', progress: '', trades: {}, sampling: '', notice: '', important: '' };
                 }
                 appData[currentMonth].data[site.id] = { workers: [...defaultWorkers], days: dayList };
@@ -528,7 +604,7 @@
         defaultSites.forEach(site => {
             let dayList = []; let siteLogs = {};
             for (let i = 1; i <= 30; i++) {
-                dayList.push({ dayIndex: i, dateStr: `${i}日`, amWorkers: [], amProject: '', pmWorkers: [], pmProject: '', unworked: [], note: '' });
+                dayList.push({ dayIndex: i, dateStr: `${i}日`, amWorkers: [], amProject: '', amTime: '', amPhotoName: '', amPhoto: '', pmWorkers: [], pmProject: '', pmTime: '', pmPhotoName: '', pmPhoto: '', note: '' });
                 siteLogs[i] = { selectedSiteId: site.id, weatherAm: '晴', weatherPm: '晴', progress: '', trades: {}, sampling: '', notice: '', important: '' };
             }
             appData[val].data[site.id] = { workers: [...defaultWorkers], days: dayList };
@@ -547,10 +623,10 @@
         let siteId = 'site_' + Date.now();
         let monthSites = appData[currentMonth].sites;
         if (monthSites.some(s => s.name === name)) { alert('名稱已存在！'); return; }
-        monthSites.push({ id: siteId, name: name, title: `臺南市${name}工程出工人數統計` });
+        monthSites.push({ id: siteId, name: name, title: `臺南市${name}工程` });
         let dayList = []; let siteLogs = {};
         for (let i = 1; i <= 30; i++) {
-            dayList.push({ dayIndex: i, dateStr: `${i}日`, amWorkers: [], amProject: '', pmWorkers: [], pmProject: '', unworked: [], note: '' });
+            dayList.push({ dayIndex: i, dateStr: `${i}日`, amWorkers: [], amProject: '', amTime: '', amPhotoName: '', amPhoto: '', pmWorkers: [], pmProject: '', pmTime: '', pmPhotoName: '', pmPhoto: '', note: '' });
             siteLogs[i] = { selectedSiteId: siteId, weatherAm: '晴', weatherPm: '晴', progress: '', trades: {}, sampling: '', notice: '', important: '' };
         }
         appData[currentMonth].data[siteId] = { workers: [...defaultWorkers], days: dayList };
@@ -582,7 +658,7 @@
         let newName = prompt("請輸入新的案場名稱：", site.name);
         if (!newName || !newName.trim()) return;
         site.name = newName.trim();
-        site.title = `臺南市${site.name}工程出工人數統計`;
+        site.title = `臺南市${site.name}工程`;
         saveDB(); initUI();
     }
 
@@ -686,16 +762,28 @@
         tbody.innerHTML = '';
 
         siteData.days.forEach((row, index) => {
+            let unworkedWorkers = siteData.workers.filter(w => !row.amWorkers.includes(w) && !row.pmWorkers.includes(w));
+
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${row.dayIndex}</td>
                 <td><strong style="white-space: nowrap;">${currentMonth}${row.dateStr}</strong></td>
                 <td><div class="worker-selector">${siteData.workers.map(w => `<label class="worker-badge"><input type="checkbox" value="${w}" ${row.amWorkers.includes(w) ? 'checked' : ''} onchange="updateWorker(${index}, 'am', '${w}', this.checked)">${w}</label>`).join('')}</div></td>
                 <td><textarea class="resizable-box" oninput="updateField(${index}, 'amProject', this.value)">${row.amProject || ''}</textarea></td>
+                <td><input type="time" value="${row.amTime || ''}" onchange="updateField(${index}, 'amTime', this.value)" style="width: 85px; padding: 4px; font-size: 13px;"></td>
+                <td>
+                    <input type="file" accept="image/*" onchange="updateRowPhoto(${index}, 'am', this)" style="font-size: 10px; width: 120px; margin-bottom: 2px;">
+                    <div style="font-size: 10px; color: #2b6cb0; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px;">${row.amPhotoName || ''}</div>
+                </td>
                 <td><div class="worker-selector">${siteData.workers.map(w => `<label class="worker-badge"><input type="checkbox" value="${w}" ${row.pmWorkers.includes(w) ? 'checked' : ''} onchange="updateWorker(${index}, 'pm', '${w}', this.checked)">${w}</label>`).join('')}</div></td>
                 <td><textarea class="resizable-box" oninput="updateField(${index}, 'pmProject', this.value)">${row.pmProject || ''}</textarea></td>
-                <td><div class="worker-selector">${siteData.workers.map(w => ` <label class="worker-badge"><input type="checkbox" value="${w}" ${row.unworked.includes(w) ? 'checked' : ''} onchange="updateWorker(${index}, 'unworked', '${w}', this.checked)">${w}</label>`).join('')}</div></td>
-                <td><textarea class="resizable-box" oninput="updateField(${index}, 'note', this.value)">${row.note || ''}</textarea></td>
+                <td><input type="time" value="${row.pmTime || ''}" onchange="updateField(${index}, 'pmTime', this.value)" style="width: 85px; padding: 4px; font-size: 13px;"></td>
+                <td>
+                    <input type="file" accept="image/*" onchange="updateRowPhoto(${index}, 'pm', this)" style="font-size: 10px; width: 120px; margin-bottom: 2px;">
+                    <div style="font-size: 10px; color: #2b6cb0; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px;">${row.pmPhotoName || ''}</div>
+                </td>
+                <td><div style="text-align: left; padding: 4px;"><span class="unworked-display">${unworkedWorkers.length > 0 ? unworkedWorkers.join('、') : '無'}</span></div></td>
+                <td><textarea class="resizable-box" style="min-height: 40px;" oninput="updateField(${index}, 'note', this.value)">${row.note || ''}</textarea></td>
             `;
             tbody.appendChild(tr);
         });
@@ -717,7 +805,7 @@
 
         if (meta.startDate && meta.duration > 0) {
             let startD = new Date(meta.startDate);
-            let totalDaysToAdd = parseInt(meta.duration) + suspensionDays;
+            let totalDaysToAdd = parseInt(meta.duration) + suspensionDays - 1;
             startD.setDate(startD.getDate() + totalDaysToAdd);
             let y = startD.getFullYear();
             let m = String(startD.getMonth() + 1).padStart(2, '0');
@@ -730,24 +818,49 @@
 
     function updateProjectMeta() {
         if (!appData[currentMonth].meta) appData[currentMonth].meta = {};
-        let meta = {
-            startDate: document.getElementById('meta-start-date').value,
-            duration: parseInt(document.getElementById('meta-duration').value) || 0,
-            durationType: document.getElementById('meta-duration-type').value,
-            extension: document.getElementById('meta-extension').value,
-            suspensionDate: document.getElementById('meta-suspension-date').value,
-            resumptionDate: document.getElementById('meta-resumption-date').value
-        };
+        let meta = appData[currentMonth].meta[currentSiteId] || {};
+        meta.startDate = document.getElementById('meta-start-date').value;
+        meta.duration = parseInt(document.getElementById('meta-duration').value) || 0;
+        meta.durationType = document.getElementById('meta-duration-type').value;
+        meta.extension = document.getElementById('meta-extension').value;
+        meta.suspensionDate = document.getElementById('meta-suspension-date').value;
+        meta.resumptionDate = document.getElementById('meta-resumption-date').value;
+        
         appData[currentMonth].meta[currentSiteId] = meta;
         calculateProjectMetaValues(meta);
         saveDB();
     }
 
+    function updateRowPhoto(dayIndex, session, input) {
+        if (input.files && input.files[0]) {
+            let file = input.files[0];
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let siteData = appData[currentMonth].data[currentSiteId];
+                if (session === 'am') {
+                    siteData.days[dayIndex].amPhoto = e.target.result;
+                    siteData.days[dayIndex].amPhotoName = file.name;
+                } else {
+                    siteData.days[dayIndex].pmPhoto = e.target.result;
+                    siteData.days[dayIndex].pmPhotoName = file.name;
+                }
+                saveDB();
+                renderSitePane();
+                alert(`${session === 'am' ? '上午' : '下午'}報班照片上傳成功！`);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
     function initColumnResizer() {
         const table = document.getElementById('main-table');
         table.querySelectorAll('th').forEach((th) => {
-            const resizer = th.querySelector('.resizer');
-            if (!resizer) return;
+            let resizer = th.querySelector('.resizer');
+            if (!resizer) {
+                resizer = document.createElement('div');
+                resizer.className = 'resizer';
+                th.appendChild(resizer);
+            }
             let x = 0; let w = 0;
             resizer.onmousedown = function (e) {
                 x = e.clientX; w = th.offsetWidth;
@@ -760,10 +873,11 @@
     function updateWorker(dayIndex, type, workerName, isChecked) {
         let siteData = appData[currentMonth].data[currentSiteId];
         let dayData = siteData.days[dayIndex];
-        let targetList = type === 'am' ? dayData.amWorkers : (type === 'pm' ? dayData.pmWorkers : dayData.unworked);
+        let targetList = type === 'am' ? dayData.amWorkers : dayData.pmWorkers;
         if (isChecked) { if (!targetList.includes(workerName)) targetList.push(workerName); }
         else { let idx = targetList.indexOf(workerName); if (idx > -1) targetList.splice(idx, 1); }
         saveDB();
+        renderSitePane();
     }
 
     function updateField(dayIndex, fieldName, value) {
@@ -774,7 +888,7 @@
     function updateWorkerList() {
         let inputVal = document.getElementById('worker-list-input').value;
         appData[currentMonth].data[currentSiteId].workers = inputVal.split(',').map(w => w.trim()).filter(w => w !== '');
-        saveDB(); initReportPane(); alert('名單已更新！');
+        saveDB(); renderSitePane(); alert('名單已更新！');
     }
 
     function initReportPane() {
@@ -788,9 +902,8 @@
             select.appendChild(opt);
         });
 
-        // 自動定位到「今天」的日期
         let todayDate = new Date();
-        let tYear = todayDate.getFullYear() - 1911; // 轉民國年
+        let tYear = todayDate.getFullYear() - 1911;
         let tMonth = todayDate.getMonth() + 1;
         let tDay = todayDate.getDate();
         let targetMonthStr = `${tYear}年${tMonth}月`;
@@ -844,22 +957,24 @@
         let amR = [];
         activeSitesAm.forEach(({ site, dData }) => {
             let amStr = dData.amWorkers.length > 0 ? dData.amWorkers.join('、') : '無';
-            let unworkedStr = dData.unworked.length > 0 ? dData.unworked.join('、') : '無';
+            let sWorkers = appData[currentMonth].data[site.id].workers;
+            let unworked = sWorkers.filter(w => !dData.amWorkers.includes(w) && !dData.pmWorkers.includes(w)).join('、') || '無';
             amR.push(
-`上午出工：共${dData.amWorkers.length}人（${amStr}），未出工：${unworkedStr}
+`上午出工：共${dData.amWorkers.length}人（${amStr}），未出工：${unworked}
 案場：${site.name}
-項目：${dData.amProject || '無'}`
+項目：${dData.amProject || '無'} (時間: ${dData.amTime || '未填'})`
             );
         });
 
         let pmR = [];
         activeSitesPm.forEach(({ site, dData }) => {
             let pmStr = dData.pmWorkers.length > 0 ? dData.pmWorkers.join('、') : '無';
-            let unworkedStr = dData.unworked.length > 0 ? dData.unworked.join('、') : '無';
+            let sWorkers = appData[currentMonth].data[site.id].workers;
+            let unworked = sWorkers.filter(w => !dData.amWorkers.includes(w) && !dData.pmWorkers.includes(w)).join('、') || '無';
             pmR.push(
-`下午出工：共${dData.pmWorkers.length}人（${pmStr}），未出工：${unworkedStr}
+`下午出工：共${dData.pmWorkers.length}人（${pmStr}），未出工：${unworked}
 案場：${site.name}
-項目：${dData.pmProject || '無'}`
+項目：${dData.pmProject || '無'} (時間: ${dData.pmTime || '未填'})`
             );
         });
 
@@ -884,7 +999,6 @@
         select.innerHTML = '';
         for (let i = 1; i <= 30; i++) { select.add(new Option(`${i}日`, i)); }
 
-        // 施工日誌填報也自動對應到今天日期
         let todayDate = new Date();
         let tMonth = todayDate.getMonth() + 1;
         let tDay = todayDate.getDate();
@@ -962,6 +1076,19 @@
         saveDB(); generateLogText();
     }
 
+    function autoNumberedProgress(textarea) {
+        let val = textarea.value;
+        let lines = val.split('\n');
+        let formatted = lines.map((line, idx) => {
+            let clean = line.replace(/^(\d+[\.、]\s*|[\u2460-\u2469]\s*)/, '').trim();
+            if (!clean) return '';
+            return `${idx + 1}. ${clean}`;
+        }).filter(l => l !== '').join('\n');
+        
+        textarea.value = formatted;
+        saveLogData();
+    }
+
     function generateLogText() {
         let dayIndex = parseInt(document.getElementById('log-date-select').value);
         let siteId = document.getElementById('log-project-select').value;
@@ -971,12 +1098,10 @@
         
         let rawProgress = log.progress || '';
         let lines = rawProgress.split('\n');
-        let circledNums = ['➊', '➋', '➌', '➍', '➎', '➏', '➐', '➑', '➒', '➓'];
         let formattedProgress = lines.map((line, idx) => {
-            let cleanLine = line.replace(/^[➊➋➌➍➎➏➐➑➒➓1-9][\.、\s]*/, '').trim();
-            if (!cleanLine) return '';
-            let numSymbol = circledNums[idx] || `(${idx + 1})`;
-            return `${numSymbol}${cleanLine}`;
+            let clean = line.replace(/^(\d+[\.、]\s*|[\u2460-\u2469]\s*)/, '').trim();
+            if (!clean) return '';
+            return `${idx + 1}. ${clean}`;
         }).filter(l => l !== '').join('\n');
 
         document.getElementById('log-text-output').innerText = 
@@ -1007,6 +1132,8 @@ ${tText}
         
         appData[currentMonth].sites.forEach(site => {
             let sData = appData[currentMonth].data[site.id];
+            let sWorkers = sData.workers;
+            let meta = appData[currentMonth].meta && appData[currentMonth].meta[site.id] ? appData[currentMonth].meta[site.id] : {};
             html += `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding-left: 5px; padding-right: 5px;">
                     <h4 style="color: #2d3748; margin: 0;">${site.name}</h4>
@@ -1016,9 +1143,10 @@ ${tText}
                     </div>
                 </div>
             `;
-            html += `<table><thead><tr><th>日期</th><th>上午人數</th><th>下午人數</th><th>備註</th></tr></thead><tbody>`;
+            html += `<table><thead><tr><th>日期</th><th>上午人數</th><th>下午人數</th><th>未出工人數</th><th>備註</th></tr></thead><tbody>`;
             sData.days.forEach(d => {
-                html += `<tr><td>${currentMonth}${d.dateStr}</td><td>${d.amWorkers.length}人</td><td>${d.pmWorkers.length}人</td><td>${d.note || ''}</td></tr>`;
+                let unworked = sWorkers.filter(w => !d.amWorkers.includes(w) && !d.pmWorkers.includes(w)).join('、') || '無';
+                html += `<tr><td>${currentMonth}${d.dateStr}</td><td>${d.amWorkers.length}人</td><td>${d.pmWorkers.length}人</td><td>${unworked}</td><td>${d.note || ''}</td></tr>`;
             });
             html += `</tbody></table>`;
         });
@@ -1029,14 +1157,21 @@ ${tText}
         let wb = XLSX.utils.book_new();
         appData[currentMonth].sites.forEach(site => {
             let meta = appData[currentMonth].meta && appData[currentMonth].meta[site.id] ? appData[currentMonth].meta[site.id] : {};
+            let sWorkers = appData[currentMonth].data[site.id].workers;
             let rows = [
                 [`${currentMonth} - ${site.name} 總表`],
                 [`開工日期: ${meta.startDate || '未填'}  |  完工工期: 自動計算  |  工期: ${meta.duration || 0} ${meta.durationType || '日曆天'}  |  展延: ${meta.extension || '無'}  |  停工: ${meta.suspensionDate || '無'}  |  復工: ${meta.resumptionDate || '無'}`],
                 [],
-                ['項次', '日期', '上午人數', '上午名單', '下午人數', '下午名單', '備註']
+                ['項次', '日期', '上午人數', '上午名單', '上午時間', '上午照片', '下午人數', '下午名單', '下午時間', '下午照片', '未出工人員', '備註']
             ];
             appData[currentMonth].data[site.id].days.forEach(d => {
-                rows.push([d.dayIndex, `${currentMonth}${d.dateStr}`, d.amWorkers.length, d.amWorkers.join('、'), d.pmWorkers.length, d.pmWorkers.join('、'), d.note || '']);
+                let unworked = sWorkers.filter(w => !d.amWorkers.includes(w) && !d.pmWorkers.includes(w)).join('、') || '無';
+                rows.push([
+                    d.dayIndex, `${currentMonth}${d.dateStr}`, 
+                    d.amWorkers.length, d.amWorkers.join('、'), d.amTime || '', d.amPhotoName || '', 
+                    d.pmWorkers.length, d.pmWorkers.join('、'), d.pmTime || '', d.pmPhotoName || '', 
+                    unworked, d.note || ''
+                ]);
             });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), site.name);
         });
@@ -1048,14 +1183,21 @@ ${tText}
         if (!site) return;
         let wb = XLSX.utils.book_new();
         let meta = appData[currentMonth].meta && appData[currentMonth].meta[site.id] ? appData[currentMonth].meta[site.id] : {};
+        let sWorkers = appData[currentMonth].data[site.id].workers;
         let rows = [
             [`${currentMonth} - ${site.name} 總表`],
             [`開工日期: ${meta.startDate || '未填'}  |  完工工期: 自動計算  |  工期: ${meta.duration || 0} ${meta.durationType || '日曆天'}  |  展延: ${meta.extension || '無'}  |  停工: ${meta.suspensionDate || '無'}  |  復工: ${meta.resumptionDate || '無'}`],
             [],
-            ['項次', '日期', '上午人數', '上午名單', '下午人數', '下午名單', '備註']
+            ['項次', '日期', '上午人數', '上午名單', '上午時間', '上午照片', '下午人數', '下午名單', '下午時間', '下午照片', '未出工人員', '備註']
         ];
         appData[currentMonth].data[site.id].days.forEach(d => {
-            rows.push([d.dayIndex, `${currentMonth}${d.dateStr}`, d.amWorkers.length, d.amWorkers.join('、'), d.pmWorkers.length, d.pmWorkers.join('、'), d.note || '']);
+            let unworked = sWorkers.filter(w => !d.amWorkers.includes(w) && !d.pmWorkers.includes(w)).join('、') || '無';
+            rows.push([
+                d.dayIndex, `${currentMonth}${d.dateStr}`, 
+                d.amWorkers.length, d.amWorkers.join('、'), d.amTime || '', d.amPhotoName || '', 
+                d.pmWorkers.length, d.pmWorkers.join('、'), d.pmTime || '', d.pmPhotoName || '', 
+                unworked, d.note || ''
+            ]);
         });
         let ws = XLSX.utils.aoa_to_sheet(rows);
         XLSX.utils.book_append_sheet(wb, ws, site.name);
@@ -1085,16 +1227,20 @@ ${tText}
                 let monthData = appData[m];
                 if (monthData && monthData.data && monthData.data[siteId]) {
                     let sData = monthData.data[siteId];
+                    let sWorkers = sData.workers;
                     let meta = monthData.meta && monthData.meta[siteId] ? monthData.meta[siteId] : {};
                     rows.push([`${m} 統計明細 (開工: ${meta.startDate || '未填'}, 工期: ${meta.duration || 0} ${meta.durationType || '日曆天'})`]);
-                    rows.push(['項次', '日期', '上午人數', '上午名單', '上午施工項目', '下午人數', '下午名單', '下午施工項目', '未出工人員', '備註']);
+                    rows.push(['項次', '日期', '上午人數', '上午名單', '上午時間', '下午人數', '下午名單', '下午時間', '未出工人員', '備註']);
                     
                     sData.days.forEach(d => {
                         let hasWorked = d.amWorkers.length > 0 || d.pmWorkers.length > 0 || (d.amProject && d.amProject.trim()) || (d.pmProject && d.pmProject.trim());
                         if (hasWorked) totalWorkDays++;
+                        let unworked = sWorkers.filter(w => !d.amWorkers.includes(w) && !d.pmWorkers.includes(w)).join('、') || '無';
                         rows.push([
                             d.dayIndex, `${m}${d.dateStr}`,
-                            d.amWorkers.length, d.amWorkers.join('、'), d.pmWorkers.length, d.pmWorkers.join('、'), d.note || ''
+                            d.amWorkers.length, d.amWorkers.join('、'), d.amTime || '',
+                            d.pmWorkers.length, d.pmWorkers.join('、'), d.pmTime || '',
+                            unworked, d.note || ''
                         ]);
                     });
                     rows.push([]);
@@ -1132,16 +1278,20 @@ ${tText}
             let monthData = appData[m];
             if (monthData && monthData.data && monthData.data[siteId]) {
                 let sData = monthData.data[siteId];
+                let sWorkers = sData.workers;
                 let meta = monthData.meta && monthData.meta[siteId] ? monthData.meta[siteId] : {};
                 rows.push([`${m} 統計明細 (開工: ${meta.startDate || '未填'}, 工期: ${meta.duration || 0} ${meta.durationType || '日曆天'})`]);
-                rows.push(['項次', '日期', '上午人數', '上午名單', '下午人數', '下午名單', '備註']);
+                rows.push(['項次', '日期', '上午人數', '上午名單', '上午時間', '下午人數', '下午名單', '下午時間', '未出工人員', '備註']);
                 
                 sData.days.forEach(d => {
                     let hasWorked = d.amWorkers.length > 0 || d.pmWorkers.length > 0 || (d.amProject && d.amProject.trim()) || (d.pmProject && d.pmProject.trim());
                     if (hasWorked) totalWorkDays++;
+                    let unworked = sWorkers.filter(w => !d.amWorkers.includes(w) && !d.pmWorkers.includes(w)).join('、') || '無';
                     rows.push([
                         d.dayIndex, `${m}${d.dateStr}`,
-                        d.amWorkers.length, d.amWorkers.join('、'), d.pmWorkers.length, d.pmWorkers.join('、'), d.note || ''
+                        d.amWorkers.length, d.amWorkers.join('、'), d.amTime || '',
+                        d.pmWorkers.length, d.pmWorkers.join('、'), d.pmTime || '',
+                        unworked, d.note || ''
                     ]);
                 });
                 rows.push([]);
