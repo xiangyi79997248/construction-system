@@ -401,14 +401,6 @@
 <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4rFaW0Suvyc0eaPaxISxNrJvEkJjmWdgM_Aqw2pFafvpy-uodbYA6z4Ia7cczzZNC/exec";
 
-    const baseSites = [
-        { id: 'qigu', name: '七股', title: '臺南市七股區圖書館耐震補強工程' },
-        { id: 'beiliao', name: '北寮里活動中心', title: '南化區北寮里活動中心耐震補強工程' },
-        { id: 'annan', name: '安南-溪頂', title: '臺南市安南區溪頂寮工程' },
-        { id: 'company', name: '公司', title: '公司內部行政作業' },
-        { id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true }
-    ];
-
     const defaultWorkers = ["盧明君", "林智宇", "吳炫德", "邱龍展"];
     const tradeList = ["植筋工", "鋼筋工", "模板工", "泥水工", "機械操作工", "體力工", "建築細木工", "水電工", "混凝土澆置工", "路面鋪設工", "砌石工", "油漆工", "鐵工", "鷹架工", "吊車", "防水工"];
 
@@ -416,8 +408,25 @@
         let db = {};
         let months = ['115年9月', '115年10月'];
         months.forEach(m => {
-            db[m] = { sites: JSON.parse(JSON.stringify(baseSites)), data: {}, logs: {}, meta: {}, warrantySubSites: {} };
-            baseSites.forEach(site => {
+            db[m] = { 
+                sites: [
+                    { id: 'qigu', name: '七股', title: '臺南市七股區圖書館耐震補強工程' },
+                    { id: 'beiliao', name: '北寮里活動中心', title: '南化區北寮里活動中心耐震補強工程' },
+                    { id: 'annan', name: '安南-溪頂', title: '臺南市安南區溪頂寮工程' },
+                    { id: 'company', name: '公司', title: '公司內部行政作業' },
+                    { id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true }
+                ], 
+                data: {}, 
+                logs: {}, 
+                meta: {}, 
+                warrantySubSites: {
+                    'warranty_pool': [
+                        { id: 'sub_1', name: '某某學校維修案', date: '2026-09-09', workers: '盧明君', project: '保固修繕漏水', note: '已完成' }
+                    ]
+                } 
+            };
+            db[m].sites.forEach(site => {
+                if (site.isWarrantyRoot) return;
                 let daysCount = m.includes('9月') ? 30 : 31;
                 let dayList = [];
                 let siteLogs = {};
@@ -439,30 +448,24 @@
                     });
                     siteLogs[i] = { selectedSiteId: site.id, weatherAm: "晴", weatherPm: "晴", workersSummary: "", progress: "", trades: {}, sampling: "", notice: "", important: "" };
                 }
-                if (!site.isWarrantyRoot) {
-                    db[m].data[site.id] = { workers: [...defaultWorkers], days: dayList };
-                    db[m].logs[site.id] = siteLogs;
-                    db[m].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
-                }
+                db[m].data[site.id] = { workers: [...defaultWorkers], days: dayList };
+                db[m].logs[site.id] = siteLogs;
+                db[m].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
             });
-            db[m].warrantySubSites['warranty_pool'] = [
-                { id: 'sub_1', name: '某某學校維修案', date: '2026-09-09', workers: '盧明君', project: '保固修繕漏水', note: '已完成' }
-            ];
         });
         return db;
     }
 
     let appData = JSON.parse(localStorage.getItem('construction_master_db_cloud')) || getInitialDB();
 
-    // 強制確保每一個月份的 sites 裡面一定包含「保固中案場」，即使載入舊快取也不會遺失！
+    // 強制掃描並補上「保固中案場」分頁，保證絕對不會不見！
     Object.keys(appData).forEach(m => {
         if (!appData[m].sites) {
-            appData[m].sites = JSON.parse(JSON.stringify(baseSites));
-        } else {
-            let hasWarranty = appData[m].sites.some(s => s.id === 'warranty_pool');
-            if (!hasWarranty) {
-                appData[m].sites.push({ id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true });
-            }
+            appData[m].sites = [];
+        }
+        let hasWarranty = appData[m].sites.some(s => s.id === 'warranty_pool');
+        if (!hasWarranty) {
+            appData[m].sites.push({ id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true });
         }
         if (!appData[m].warrantySubSites) appData[m].warrantySubSites = {};
         if (!appData[m].warrantySubSites['warranty_pool']) {
@@ -504,9 +507,8 @@
             let json = await res.json();
             if (json && json.data && Object.keys(json.data).length > 0) {
                 appData = json.data;
-                // 同樣確保雲端載入的資料也包含保固案場
                 Object.keys(appData).forEach(m => {
-                    if (!appData[m].sites) appData[m].sites = JSON.parse(JSON.stringify(baseSites));
+                    if (!appData[m].sites) appData[m].sites = [];
                     if (!appData[m].sites.some(s => s.id === 'warranty_pool')) {
                         appData[m].sites.push({ id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true });
                     }
@@ -549,8 +551,15 @@
     function switchMonth(month) {
         currentMonth = month;
         if (!appData[currentMonth]) {
-            appData[currentMonth] = { sites: JSON.parse(JSON.stringify(baseSites)), data: {}, logs: {}, meta: {}, warrantySubSites: {} };
-            baseSites.forEach(site => {
+            appData[currentMonth] = { sites: [
+                { id: 'qigu', name: '七股', title: '臺南市七股區圖書館耐震補強工程' },
+                { id: 'beiliao', name: '北寮里活動中心', title: '南化區北寮里活動中心耐震補強工程' },
+                { id: 'annan', name: '安南-溪頂', title: '臺南市安南區溪頂寮工程' },
+                { id: 'company', name: '公司', title: '公司內部行政作業' },
+                { id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true }
+            ], data: {}, logs: {}, meta: {}, warrantySubSites: { 'warranty_pool': [] } };
+            
+            appData[currentMonth].sites.forEach(site => {
                 if (site.isWarrantyRoot) return;
                 let dayList = []; let siteLogs = {};
                 for (let i = 1; i <= 30; i++) {
@@ -561,7 +570,6 @@
                 appData[currentMonth].logs[site.id] = siteLogs;
                 appData[currentMonth].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
             });
-            appData[currentMonth].warrantySubSites['warranty_pool'] = [];
             saveDB();
         }
         let monthSites = appData[currentMonth].sites;
@@ -577,8 +585,17 @@
         if (!y || !mo) { alert('請完整輸入年與月'); return; }
         let val = y + mo;
         if (appData[val]) { alert('此年月已存在！'); return; }
-        appData[val] = { sites: JSON.parse(JSON.stringify(baseSites)), data: {}, logs: {}, meta: {}, warrantySubSites: {} };
-        baseSites.forEach(site => {
+        
+        let newSites = [
+            { id: 'qigu', name: '七股', title: '臺南市七股區圖書館耐震補強工程' },
+            { id: 'beiliao', name: '北寮里活動中心', title: '南化區北寮里活動中心耐震補強工程' },
+            { id: 'annan', name: '安南-溪頂', title: '臺南市安南區溪頂寮工程' },
+            { id: 'company', name: '公司', title: '公司內部行政作業' },
+            { id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true }
+        ];
+
+        appData[val] = { sites: newSites, data: {}, logs: {}, meta: {}, warrantySubSites: { 'warranty_pool': [] } };
+        newSites.forEach(site => {
             if (site.isWarrantyRoot) return;
             let dayList = []; let siteLogs = {};
             for (let i = 1; i <= 30; i++) {
@@ -589,7 +606,6 @@
             appData[val].logs[site.id] = siteLogs;
             appData[val].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
         });
-        appData[val].warrantySubSites['warranty_pool'] = [];
         saveDB(); currentMonth = val;
         document.getElementById('new-year-input').value = '';
         document.getElementById('new-month-input').value = '';
@@ -604,7 +620,6 @@
         if (monthSites.some(s => s.name === name)) { alert('名稱已存在！'); return; }
         
         let newSiteObj = { id: siteId, name: name, title: `臺南市${name}工程` };
-        // 確保新案場插入在「保固中案場」的前面
         let warrantyIdx = monthSites.findIndex(s => s.isWarrantyRoot);
         if (warrantyIdx !== -1) {
             monthSites.splice(warrantyIdx, 0, newSiteObj);
