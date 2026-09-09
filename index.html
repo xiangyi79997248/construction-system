@@ -22,7 +22,7 @@
         }
         
         .header-banner {
-            background: linear-gradient(135deg, #336666 0%, #4F9D9D 100%);
+            background: linear-gradient(135deg, #005757 0%, #336666 100%) !important;
             color: white;
             padding: 16px 20px;
             border-radius: 6px;
@@ -98,11 +98,13 @@
             font-size: 14px;
             transition: background 0.2s;
         }
-        .btn:hover { background-color: #2b6cb0; }
-        .btn-success { background-color: #38a169; }
-        .btn-success:hover { background-color: #2f855a; }
-        .btn-cloud { background-color: #d69e2e; color: white; font-weight: bold; }
-        .btn-cloud:hover { background-color: #b7791f; }
+        .btn:hover { opacity: 0.9; }
+        
+        .btn-red { background-color: #336666 !important; color: #ffffff !important; font-weight: bold; }
+        .btn-blue { background-color: #66B3FF !important; color: #fff !important; font-weight: bold; }
+        .btn-yellow { background-color: #D2A2CC !important; color: #3a1a35 !important; font-weight: bold; }
+        .btn-green { background-color: #FFD306 !important; color: #333300 !important; font-weight: bold; }
+        
         .btn-sm { padding: 4px 10px; font-size: 13px; }
 
         .cloud-sync-bar {
@@ -170,14 +172,17 @@
         }
         .tab-btn.active { background-color: #336666; color: white; }
         
+        .tab-btn.warranty-tab { background-color: #CF9E9E; color: #3a1a1a; }
+        .tab-btn.warranty-tab.active { background-color: #B58484; color: #fff; }
+
         .tab-btn.report-tab { background-color: #5B5B00; color: #fff; }
         .tab-btn.report-tab.active { background-color: #454500; color: #fff; }
 
         .tab-btn.log-tab { background-color: #81C0C0; color: #113333; }
         .tab-btn.log-tab.active { background-color: #5FA5A5; color: #fff; }
 
-        .tab-btn.export-tab { background-color: #B9B9FF; color: #222255; }
-        .tab-btn.export-tab.active { background-color: #8E8EE0; color: #fff; }
+        .tab-btn.export-tab { background-color: #9999CC; color: #222244; }
+        .tab-btn.export-tab.active { background-color: #7777AA; color: #fff; }
 
         .close-site {
             background: rgba(0,0,0,0.2); color: #fff; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer;
@@ -191,13 +196,14 @@
         .table-responsive {
             max-height: 720px;
             overflow-y: auto;
+            overflow-x: auto;
             border: 1px solid #ccc;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             background: #fff;
-            table-layout: auto;
+            table-layout: fixed;
         }
         th, td {
             border: 1px solid #ccc;
@@ -205,9 +211,11 @@
             text-align: center;
             font-size: 14px;
             position: relative;
+            overflow: hidden;
+            word-wrap: break-word;
         }
         th {
-            background-color: #e2e8f0;
+            background-color: #D1E9E9;
             color: #1a202c;
             position: sticky;
             top: 0;
@@ -216,8 +224,8 @@
             user-select: none;
         }
         .resizer {
-            position: absolute; top: 0; right: 0; width: 8px; cursor: col-resize; user-select: none; touch-action: none; height: 100%;
-            z-index: 15;
+            position: absolute; top: 0; right: 0; width: 10px; cursor: col-resize; user-select: none; touch-action: none; height: 100%;
+            z-index: 20;
         }
         .resizer:hover, .resizing { background-color: #3182ce; }
         tr:nth-child(even) { background-color: #f8fafc; }
@@ -277,8 +285,8 @@
             ☁️ <strong>雲端狀態：</strong> <span id="sync-status" style="color: #1b381b;">就緒（每次修改後請點擊儲存）</span>
         </div>
         <div>
-            <button class="btn btn-cloud" onclick="saveToCloud()">☁️ 儲存資料至雲端</button>
-            <button class="btn" onclick="loadFromCloud()" style="background-color: #4a5568;">🔄 從雲端重新載入</button>
+            <button class="btn btn-green" onclick="saveToCloud()">☁️ 儲存資料至雲端</button>
+            <button class="btn btn-yellow" onclick="loadFromCloud()">🔄 從雲端重新載入</button>
         </div>
     </div>
 
@@ -289,81 +297,17 @@
             <span style="margin-left: 5px;">新增：</span>
             <input type="text" id="new-year-input" placeholder="年 (例: 115年)" style="width: 80px;">
             <input type="text" id="new-month-input" placeholder="月 (例: 10月)" style="width: 80px;">
-            <button class="btn btn-success" onclick="addNewMonth()">＋ 新增年月</button>
+            <button class="btn btn-red" onclick="addNewMonth()">＋ 新增年月</button>
         </div>
         <div class="control-group">
             <input type="text" id="new-site-name" placeholder="請輸入新案場名稱 (例如: 新市工地)" style="width: 240px;">
-            <button class="btn btn-success" onclick="addNewSite()">＋ 新增案場</button>
+            <button class="btn btn-red" onclick="addNewSite()">＋ 新增案場</button>
         </div>
     </div>
 
     <div class="tabs" id="site-tabs"></div>
 
-    <div id="site-content-pane">
-        <div class="project-meta-panel">
-            <div class="meta-item">
-                <label><strong>開工日期：</strong></label>
-                <input type="date" id="meta-start-date" onchange="updateProjectMeta()">
-            </div>
-            <div class="meta-item">
-                <label><strong>完工工期：</strong></label>
-                <span id="meta-end-date" style="font-weight: bold; color: #1e331e; background: #fff; padding: 5px 10px; border: 1px solid #93c47d; border-radius: 4px; display: inline-block; min-width: 110px;">自動計算</span>
-            </div>
-            <div class="meta-item">
-                <label><strong>工期：</strong></label>
-                <input type="number" id="meta-duration" min="1" value="0" style="width: 70px;" oninput="updateProjectMeta()">
-                <select id="meta-duration-type" onchange="updateProjectMeta()">
-                    <option value="日曆天">日曆天</option>
-                    <option value="工作天">工作天</option>
-                </select>
-            </div>
-            <div class="meta-item">
-                <label><strong>展延/不計工期：</strong></label>
-                <input type="number" id="meta-extension" min="0" value="0" placeholder="例: 2" style="width: 80px;" oninput="updateProjectMeta()">
-            </div>
-            <div class="meta-item">
-                <label><strong>停工日期：</strong></label>
-                <input type="date" id="meta-suspension-date" onchange="updateProjectMeta()">
-            </div>
-            <div class="meta-item">
-                <label><strong>復工日期：</strong></label>
-                <input type="date" id="meta-resumption-date" onchange="updateProjectMeta()">
-            </div>
-            <div class="meta-item">
-                <label><strong>停工天數：</strong></label>
-                <span id="meta-suspension-days" style="font-weight: bold; color: #78350f; background: #fff; padding: 5px 10px; border: 1px solid #93c47d; border-radius: 4px; display: inline-block; min-width: 60px;">0 天</span>
-            </div>
-        </div>
-
-        <div class="config-area">
-            <label><strong>此工地可用工班/人員名單（用逗號分隔）：</strong></label>
-            <input type="text" id="worker-list-input" placeholder="例如: 盧明君, 林智宇, 吳炫德, 邱龍展">
-            <button class="btn" onclick="updateWorkerList()">更新名單</button>
-            <span style="color: #112611; font-size: 13px; margin-left: 15px;">💡 提示：記得填完後點擊上方「儲存資料至雲端」，其他人開啟時才會同步喔！</span>
-        </div>
-
-        <div class="table-responsive">
-            <table id="main-table">
-                <thead>
-                    <tr>
-                        <th style="width: 55px;">項次<div class="resizer"></div></th>
-                        <th style="width: 110px;">日期<div class="resizer"></div></th>
-                        <th style="width: 20%;">上午出工人員<div class="resizer"></div></th>
-                        <th style="width: 14%;">上午施工項目<div class="resizer"></div></th>
-                        <th style="width: 11%;">上午報班時間<div class="resizer"></div></th>
-                        <th style="width: 13%;">上午報班照片<div class="resizer"></div></th>
-                        <th style="width: 20%;">下午出工人員<div class="resizer"></div></th>
-                        <th style="width: 14%;">下午施工項目<div class="resizer"></div></th>
-                        <th style="width: 11%;">下午報班時間<div class="resizer"></div></th>
-                        <th style="width: 13%;">下午報班照片<div class="resizer"></div></th>
-                        <th style="width: 12%;">未出工人員<div class="resizer"></div></th>
-                        <th style="width: 10%;">備註<div class="resizer"></div></th>
-                    </tr>
-                </thead>
-                <tbody id="table-body"></tbody>
-            </table>
-        </div>
-    </div>
+    <div id="dynamic-content-area"></div>
 
     <div id="report-content-pane" style="display: none;">
         <div class="sub-container">
@@ -445,8 +389,8 @@
             <h2 style="color: #805ad5; margin-top:0;">📊 全案場 Excel 總表匯出與總覽</h2>
             
             <div style="margin: 20px 0; display: flex; gap: 15px; flex-wrap: wrap;">
-                <button class="btn btn-success" style="font-size: 16px; padding: 10px 20px;" onclick="exportToExcel()">📥 匯出全部案場當月總表</button>
-                <button class="btn btn-purple" style="font-size: 16px; padding: 10px 20px;" onclick="exportYearlyToExcel()">📈 匯出全部案場當年度總表（含總施作天數）</button>
+                <button class="btn btn-red" style="font-size: 16px; padding: 10px 20px;" onclick="exportToExcel()">📥 匯出全部案場當月總表</button>
+                <button class="btn btn-blue" style="font-size: 16px; padding: 10px 20px;" onclick="exportYearlyToExcel()">📈 匯出全部案場當年度總表（含總施作天數）</button>
             </div>
 
             <div id="export-preview-table" class="table-responsive"></div>
@@ -462,7 +406,7 @@
         { id: 'beiliao', name: '北寮里活動中心', title: '南化區北寮里活動中心耐震補強工程' },
         { id: 'annan', name: '安南-溪頂', title: '臺南市安南區溪頂寮工程' },
         { id: 'company', name: '公司', title: '公司內部行政作業' },
-        { id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true }
+        { id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true }
     ];
 
     const defaultWorkers = ["盧明君", "林智宇", "吳炫德", "邱龍展"];
@@ -495,9 +439,11 @@
                     });
                     siteLogs[i] = { selectedSiteId: site.id, weatherAm: "晴", weatherPm: "晴", workersSummary: "", progress: "", trades: {}, sampling: "", notice: "", important: "" };
                 }
-                db[m].data[site.id] = { workers: [...defaultWorkers], days: dayList };
-                db[m].logs[site.id] = siteLogs;
-                db[m].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
+                if (!site.isWarrantyRoot) {
+                    db[m].data[site.id] = { workers: [...defaultWorkers], days: dayList };
+                    db[m].logs[site.id] = siteLogs;
+                    db[m].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
+                }
             });
             db[m].warrantySubSites['warranty_pool'] = [
                 { id: 'sub_1', name: '某某學校維修案', date: '2026-09-09', workers: '盧明君', project: '保固修繕漏水', note: '已完成' }
@@ -511,7 +457,11 @@
     let currentSiteId = appData[currentMonth].sites[0].id;
 
     function saveDB() {
-        localStorage.setItem('construction_master_db_cloud', JSON.stringify(appData));
+        try {
+            localStorage.setItem('construction_master_db_cloud', JSON.stringify(appData));
+        } catch (e) {
+            console.error("LocalStorage 容量已滿", e);
+        }
     }
 
     async function saveToCloud() {
@@ -575,6 +525,7 @@
         if (!appData[currentMonth]) {
             appData[currentMonth] = { sites: JSON.parse(JSON.stringify(defaultSites)), data: {}, logs: {}, meta: {}, warrantySubSites: {} };
             defaultSites.forEach(site => {
+                if (site.isWarrantyRoot) return;
                 let dayList = []; let siteLogs = {};
                 for (let i = 1; i <= 30; i++) {
                     dayList.push({ dayIndex: i, dateStr: `${i}日`, amWorkers: [], amProject: '', amTime: '', amPhotoName: '', amPhoto: '', pmWorkers: [], pmProject: '', pmTime: '', pmPhotoName: '', pmPhoto: '', note: '' });
@@ -602,6 +553,7 @@
         if (appData[val]) { alert('此年月已存在！'); return; }
         appData[val] = { sites: JSON.parse(JSON.stringify(defaultSites)), data: {}, logs: {}, meta: {}, warrantySubSites: {} };
         defaultSites.forEach(site => {
+            if (site.isWarrantyRoot) return;
             let dayList = []; let siteLogs = {};
             for (let i = 1; i <= 30; i++) {
                 dayList.push({ dayIndex: i, dateStr: `${i}日`, amWorkers: [], amProject: '', amTime: '', amPhotoName: '', amPhoto: '', pmWorkers: [], pmProject: '', pmTime: '', pmPhotoName: '', pmPhoto: '', note: '' });
@@ -641,6 +593,11 @@
 
     function deleteSite(siteId, event) {
         event.stopPropagation();
+        let siteObj = appData[currentMonth].sites.find(s => s.id === siteId);
+        if (siteObj && siteObj.fixed) {
+            alert('此為固定案場，無法刪除！');
+            return;
+        }
         if (!confirm('確定刪除此案場？')) return;
         let monthSites = appData[currentMonth].sites;
         if (monthSites.length <= 1) { alert('至少保留一個案場！'); return; }
@@ -659,20 +616,28 @@
         event.stopPropagation();
         let site = appData[currentMonth].sites.find(s => s.id === siteId);
         if (!site) return;
+        if (site.fixed) {
+            alert('此為固定案場，名稱無法修改！');
+            return;
+        }
         let newName = prompt("請輸入新的案場名稱：", site.name);
         if (!newName || !newName.trim()) return;
         site.name = newName.trim();
-        site.title = site.isWarrantyRoot ? `保固中各維修案場管理` : `臺南市${site.name}工程`;
+        site.title = `臺南市${site.name}工程`;
         saveDB(); initUI();
     }
 
     function initUI() {
         initMonthSelect(); initTabs();
-        const sitePane = document.getElementById('site-content-pane');
         const reportPane = document.getElementById('report-content-pane');
         const logPane = document.getElementById('log-content-pane');
         const exportPane = document.getElementById('export-content-pane');
-        sitePane.style.display = 'none'; reportPane.style.display = 'none'; logPane.style.display = 'none'; exportPane.style.display = 'none';
+        const dynamicArea = document.getElementById('dynamic-content-area');
+        
+        reportPane.style.display = 'none'; 
+        logPane.style.display = 'none'; 
+        exportPane.style.display = 'none'; 
+        dynamicArea.style.display = 'none';
 
         const mainTitle = document.getElementById('main-title');
         let monthSites = appData[currentMonth].sites;
@@ -690,11 +655,11 @@
             mainTitle.innerText = "📊 全案場 Excel 總表匯出";
             renderExportPreview();
         } else {
-            sitePane.style.display = 'block';
+            dynamicArea.style.display = 'block';
             let currentSite = monthSites.find(s => s.id === currentSiteId) || monthSites[0];
             currentSiteId = currentSite.id;
             mainTitle.innerText = currentSite.title;
-            renderSitePane();
+            renderDynamicPane(currentSite);
         }
     }
 
@@ -705,18 +670,24 @@
 
         monthSites.forEach(site => {
             const btn = document.createElement('button');
-            btn.className = `tab-btn ${site.id === currentSiteId ? 'active' : ''}`;
+            if (site.isWarrantyRoot) {
+                btn.className = `tab-btn warranty-tab ${site.id === currentSiteId ? 'active' : ''}`;
+            } else {
+                btn.className = `tab-btn ${site.id === currentSiteId ? 'active' : ''}`;
+            }
             let spanName = document.createElement('span');
             spanName.innerText = site.name;
             spanName.onclick = () => { currentSiteId = site.id; initUI(); };
             btn.appendChild(spanName);
 
-            let editBtn = document.createElement('span');
-            editBtn.className = 'edit-site'; editBtn.innerHTML = '✎';
-            editBtn.onclick = (e) => editSiteName(site.id, e);
-            btn.appendChild(editBtn);
+            if (!site.fixed) {
+                let editBtn = document.createElement('span');
+                editBtn.className = 'edit-site'; editBtn.innerHTML = '✎';
+                editBtn.onclick = (e) => editSiteName(site.id, e);
+                btn.appendChild(editBtn);
+            }
 
-            if (monthSites.length > 1) {
+            if (monthSites.length > 1 && !site.fixed) {
                 let closeBtn = document.createElement('span');
                 closeBtn.className = 'close-site'; closeBtn.innerHTML = '&times;';
                 closeBtn.onclick = (e) => deleteSite(site.id, e);
@@ -744,16 +715,10 @@
         tabsContainer.appendChild(exportBtn);
     }
 
-    function renderSitePane() {
-        let siteObj = appData[currentMonth].sites.find(s => s.id === currentSiteId);
-        const metaPanel = document.querySelector('.project-meta-panel');
-        const configArea = document.querySelector('.config-area');
-        const tableResp = document.querySelector('.table-responsive');
-
+    function renderDynamicPane(siteObj) {
+        const area = document.getElementById('dynamic-content-area');
+        
         if (siteObj && siteObj.isWarrantyRoot) {
-            metaPanel.style.display = 'none';
-            configArea.style.display = 'none';
-            
             if (!appData[currentMonth].warrantySubSites) appData[currentMonth].warrantySubSites = {};
             if (!appData[currentMonth].warrantySubSites[currentSiteId]) {
                 appData[currentMonth].warrantySubSites[currentSiteId] = [];
@@ -762,123 +727,150 @@
 
             let html = `
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
-                    <button class="btn btn-success" onclick="addWarrantySubRow()">＋ 新增單日維修紀錄</button>
+                    <button class="btn btn-red" onclick="addWarrantySubRow()">＋ 新增</button>
                 </div>
                 <div class="table-responsive">
-                    <table>
+                    <table id="warranty-table">
                         <thead>
                             <tr>
-                                <th style="width:50px;">項次</th>
-                                <th style="width:140px;">日期</th>
-                                <th style="width:220px;">維修案場名稱</th>
-                                <th style="width:180px;">出工人員</th>
+                                <th style="width:60px;">項次</th>
+                                <th style="width:150px;">日期</th>
+                                <th style="width:240px;">維修案場名稱</th>
+                                <th style="width:200px;">出工人員</th>
                                 <th>維修/施工項目</th>
-                                <th style="width:140px;">備註</th>
-                                <th style="width:80px;">操作</th>
+                                <th style="width:160px;">備註</th>
+                                <th style="width:90px;">操作</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="warranty-tbody">
             `;
 
             if (subList.length === 0) {
-                html += `<tr><td colspan="7" style="color:#718096; padding:25px;">目前尚無紀錄，請點擊右上角「＋ 新增單日維修紀錄」開始填寫！</td></tr>`;
+                html += `<tr id="warranty-empty-row"><td colspan="7" style="color:#718096; padding:25px;">目前尚無紀錄，請點擊右上角「＋ 新增」開始填寫！</td></tr>`;
             } else {
                 subList.forEach((item, idx) => {
                     html += `
                         <tr>
-                            <td>${idx + 1}</td>
+                            <td style="color: #1a202c; font-weight: bold;" class="warranty-index">${idx + 1}</td>
                             <td><input type="date" value="${item.date || ''}" onchange="updateWarrantySub(${idx}, 'date', this.value)" style="padding:4px; width:95%;"></td>
                             <td><input type="text" value="${item.name || ''}" oninput="updateWarrantySub(${idx}, 'name', this.value)" placeholder="例: 某國小保固修繕" style="width:95%; padding:4px;"></td>
                             <td><input type="text" value="${item.workers || ''}" oninput="updateWarrantySub(${idx}, 'workers', this.value)" placeholder="例: 盧明君" style="width:95%; padding:4px;"></td>
                             <td><textarea class="resizable-box" style="min-height:35px;" oninput="updateWarrantySub(${idx}, 'project', this.value)">${item.project || ''}</textarea></td>
                             <td><input type="text" value="${item.note || ''}" oninput="updateWarrantySub(${idx}, 'note', this.value)" placeholder="備註" style="width:95%; padding:4px;"></td>
-                            <td><button class="btn btn-sm" style="background:#e53e3e;" onclick="deleteWarrantySub(${idx})">刪除</button></td>
+                            <td><button class="btn btn-sm" style="background:#e53e3e; color: #fff;" onclick="deleteWarrantySub(${idx})">刪除</button></td>
                         </tr>
                     `;
                 });
             }
 
             html += `</tbody></table></div>`;
-            tableResp.outerHTML = `<div id="export-preview-table-wrap">${html}</div>`;
+            area.innerHTML = html;
             return;
         }
 
-        metaPanel.style.display = 'grid';
-        configArea.style.display = 'block';
-        
-        let existingWrap = document.getElementById('export-preview-table-wrap');
-        if (existingWrap) {
-            existingWrap.outerHTML = `
-                <div class="table-responsive">
-                    <table id="main-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 55px;">項次<div class="resizer"></div></th>
-                                <th style="width: 110px;">日期<div class="resizer"></div></th>
-                                <th style="width: 20%;">上午出工人員<div class="resizer"></div></th>
-                                <th style="width: 14%;">上午施工項目<div class="resizer"></div></th>
-                                <th style="width: 11%;">上午報班時間<div class="resizer"></div></th>
-                                <th style="width: 13%;">上午報班照片<div class="resizer"></div></th>
-                                <th style="width: 20%;">下午出工人員<div class="resizer"></div></th>
-                                <th style="width: 14%;">下午施工項目<div class="resizer"></div></th>
-                                <th style="width: 11%;">下午報班時間<div class="resizer"></div></th>
-                                <th style="width: 13%;">下午報班照片<div class="resizer"></div></th>
-                                <th style="width: 12%;">未出工人員<div class="resizer"></div></th>
-                                <th style="width: 10%;">備註<div class="resizer"></div></th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body"></tbody>
-                    </table>
-                </div>
-            `;
-        }
-
         let siteData = appData[currentMonth].data[currentSiteId];
-        document.getElementById('worker-list-input').value = siteData.workers.join(', ');
-
         if (!appData[currentMonth].meta) appData[currentMonth].meta = {};
         if (!appData[currentMonth].meta[currentSiteId]) {
             appData[currentMonth].meta[currentSiteId] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
         }
         let meta = appData[currentMonth].meta[currentSiteId];
-        document.getElementById('meta-start-date').value = meta.startDate || '';
-        document.getElementById('meta-duration').value = meta.duration || 0;
-        document.getElementById('meta-duration-type').value = meta.durationType || '日曆天';
-        document.getElementById('meta-extension').value = meta.extension || 0;
-        document.getElementById('meta-suspension-date').value = meta.suspensionDate || '';
-        document.getElementById('meta-resumption-date').value = meta.resumptionDate || '';
+
+        let html = `
+            <div class="project-meta-panel">
+                <div class="meta-item">
+                    <label><strong>開工日期：</strong></label>
+                    <input type="date" id="meta-start-date" value="${meta.startDate || ''}" onchange="updateProjectMeta()">
+                </div>
+                <div class="meta-item">
+                    <label><strong>完工工期：</strong></label>
+                    <span id="meta-end-date" style="font-weight: bold; color: #1e331e; background: #fff; padding: 5px 10px; border: 1px solid #93c47d; border-radius: 4px; display: inline-block; min-width: 110px;">自動計算</span>
+                </div>
+                <div class="meta-item">
+                    <label><strong>工期：</strong></label>
+                    <input type="number" id="meta-duration" min="1" value="${meta.duration || 0}" style="width: 70px;" oninput="updateProjectMeta()">
+                    <select id="meta-duration-type" onchange="updateProjectMeta()">
+                        <option value="日曆天" ${meta.durationType === '日曆天' ? 'selected' : ''}>日曆天</option>
+                        <option value="工作天" ${meta.durationType === '工作天' ? 'selected' : ''}>工作天</option>
+                    </select>
+                </div>
+                <div class="meta-item">
+                    <label><strong>展延/不計工期：</strong></label>
+                    <input type="number" id="meta-extension" min="0" value="${meta.extension || 0}" placeholder="例: 2" style="width: 80px;" oninput="updateProjectMeta()">
+                </div>
+                <div class="meta-item">
+                    <label><strong>停工日期：</strong></label>
+                    <input type="date" id="meta-suspension-date" value="${meta.suspensionDate || ''}" onchange="updateProjectMeta()">
+                </div>
+                <div class="meta-item">
+                    <label><strong>復工日期：</strong></label>
+                    <input type="date" id="meta-resumption-date" value="${meta.resumptionDate || ''}" onchange="updateProjectMeta()">
+                </div>
+                <div class="meta-item">
+                    <label><strong>停工天數：</strong></label>
+                    <span id="meta-suspension-days" style="font-weight: bold; color: #78350f; background: #fff; padding: 5px 10px; border: 1px solid #93c47d; border-radius: 4px; display: inline-block; min-width: 60px;">0 天</span>
+                </div>
+            </div>
+
+            <div class="config-area">
+                <label><strong>此工地可用工班/人員名單（用逗號分隔）：</strong></label>
+                <input type="text" id="worker-list-input" value="${siteData.workers.join(', ')}" placeholder="例如: 盧明君, 林智宇, 吳炫德, 邱龍展">
+                <button class="btn" style="background-color: #3182ce; color: white;" onclick="updateWorkerList()">更新名單</button>
+                <span style="color: #112611; font-size: 13px; margin-left: 15px;">💡 提示：記得填完後點擊上方「儲存資料至雲端」，其他人開啟時才會同步喔！</span>
+            </div>
+
+            <div class="table-responsive">
+                <table id="main-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">項次<div class="resizer" data-col="0"></div></th>
+                            <th style="width: 110px;">日期<div class="resizer" data-col="1"></div></th>
+                            <th style="width: 280px;">上午出工人員<div class="resizer" data-col="2"></div></th>
+                            <th style="width: 150px;">上午施工項目<div class="resizer" data-col="3"></div></th>
+                            <th style="width: 110px;">上午報班時間<div class="resizer" data-col="4"></div></th>
+                            <th style="width: 130px;">上午報班照片<div class="resizer" data-col="5"></div></th>
+                            <th style="width: 280px;">下午出工人員<div class="resizer" data-col="6"></div></th>
+                            <th style="width: 150px;">下午施工項目<div class="resizer" data-col="7"></div></th>
+                            <th style="width: 110px;">下午報班時間<div class="resizer" data-col="8"></div></th>
+                            <th style="width: 130px;">下午報班照片<div class="resizer" data-col="9"></div></th>
+                            <th style="width: 140px;">未出工人員<div class="resizer" data-col="10"></div></th>
+                            <th style="width: 110px;">備註<div class="resizer" data-col="11"></div></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        `;
+        area.innerHTML = html;
 
         calculateProjectMetaValues(meta);
 
         const tbody = document.getElementById('table-body');
-        tbody.innerHTML = '';
-
         siteData.days.forEach((row, index) => {
             let unworkedWorkers = siteData.workers.filter(w => !row.amWorkers.includes(w) && !row.pmWorkers.includes(w));
-
             let tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${row.dayIndex}</td>
+                <td style="color: #1a202c; font-weight: bold;">${row.dayIndex}</td>
                 <td><strong style="white-space: nowrap;">${currentMonth}${row.dateStr}</strong></td>
                 <td><div class="worker-selector">${siteData.workers.map(w => `<label class="worker-badge"><input type="checkbox" value="${w}" ${row.amWorkers.includes(w) ? 'checked' : ''} onchange="updateWorker(${index}, 'am', '${w}', this.checked)">${w}</label>`).join('')}</div></td>
                 <td><textarea class="resizable-box" oninput="updateField(${index}, 'amProject', this.value)">${row.amProject || ''}</textarea></td>
                 <td><input type="time" value="${row.amTime || ''}" onchange="updateField(${index}, 'amTime', this.value)" style="width: 85px; padding: 4px; font-size: 13px;"></td>
                 <td>
-                    <input type="file" accept="image/*" onchange="updateRowPhoto(${index}, 'am', this)" style="font-size: 10px; width: 120px; margin-bottom: 2px;">
-                    <div style="font-size: 10px; color: #2b6cb0; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px;">${row.amPhotoName || ''}</div>
+                    <input type="file" accept="image/*" onchange="updateRowPhoto(${index}, 'am', this)" style="font-size: 10px; width: 110px; margin-bottom: 2px;">
+                    <div style="font-size: 10px; color: #2b6cb0; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px;">${row.amPhotoName || ''}</div>
                 </td>
                 <td><div class="worker-selector">${siteData.workers.map(w => `<label class="worker-badge"><input type="checkbox" value="${w}" ${row.pmWorkers.includes(w) ? 'checked' : ''} onchange="updateWorker(${index}, 'pm', '${w}', this.checked)">${w}</label>`).join('')}</div></td>
                 <td><textarea class="resizable-box" oninput="updateField(${index}, 'pmProject', this.value)">${row.pmProject || ''}</textarea></td>
                 <td><input type="time" value="${row.pmTime || ''}" onchange="updateField(${index}, 'pmTime', this.value)" style="width: 85px; padding: 4px; font-size: 13px;"></td>
                 <td>
-                    <input type="file" accept="image/*" onchange="updateRowPhoto(${index}, 'pm', this)" style="font-size: 10px; width: 120px; margin-bottom: 2px;">
-                    <div style="font-size: 10px; color: #2b6cb0; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px;">${row.pmPhotoName || ''}</div>
+                    <input type="file" accept="image/*" onchange="updateRowPhoto(${index}, 'pm', this)" style="font-size: 10px; width: 110px; margin-bottom: 2px;">
+                    <div style="font-size: 10px; color: #2b6cb0; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px;">${row.pmPhotoName || ''}</div>
                 </td>
                 <td><div style="text-align: left; padding: 4px;"><span class="unworked-display">${unworkedWorkers.length > 0 ? unworkedWorkers.join('、') : '無'}</span></div></td>
                 <td><textarea class="resizable-box" style="min-height: 40px;" oninput="updateField(${index}, 'note', this.value)">${row.note || ''}</textarea></td>
             `;
             tbody.appendChild(tr);
         });
+
         initColumnResizer();
     }
 
@@ -887,18 +879,22 @@
         if (!appData[currentMonth].warrantySubSites[currentSiteId]) {
             appData[currentMonth].warrantySubSites[currentSiteId] = [];
         }
-        let globalWorkers = appData[currentMonth].data[currentSiteId] ? appData[currentMonth].data[currentSiteId].workers : defaultWorkers;
+        let globalWorkers = defaultWorkers;
         let todayStr = new Date().toISOString().split('T')[0];
 
-        appData[currentMonth].warrantySubSites[currentSiteId].push({
+        let newRecord = {
             name: '',
             date: todayStr,
             project: '',
             workers: globalWorkers.join('、'),
             note: ''
-        });
+        };
+
+        appData[currentMonth].warrantySubSites[currentSiteId].push(newRecord);
         saveDB();
-        renderSitePane();
+
+        let warrantySiteObj = appData[currentMonth].sites.find(s => s.id === currentSiteId);
+        renderDynamicPane(warrantySiteObj);
     }
 
     function updateWarrantySub(idx, field, val) {
@@ -916,7 +912,8 @@
         if (list) {
             list.splice(idx, 1);
             saveDB();
-            renderSitePane();
+            let warrantySiteObj = appData[currentMonth].sites.find(s => s.id === currentSiteId);
+            renderDynamicPane(warrantySiteObj);
         }
     }
 
@@ -931,19 +928,23 @@
                 suspensionDays = diffDays;
             }
         }
-        document.getElementById('meta-suspension-days').innerText = suspensionDays + " 天";
+        let sDaysEl = document.getElementById('meta-suspension-days');
+        if (sDaysEl) sDaysEl.innerText = suspensionDays + " 天";
 
-        if (meta.startDate && meta.duration > 0) {
-            let startD = new Date(meta.startDate);
-            let extensionDays = parseInt(meta.extension) || 0;
-            let totalDaysToAdd = parseInt(meta.duration) + suspensionDays + extensionDays - 1;
-            startD.setDate(startD.getDate() + totalDaysToAdd);
-            let y = startD.getFullYear();
-            let m = String(startD.getMonth() + 1).padStart(2, '0');
-            let d = String(startD.getDate()).padStart(2, '0');
-            document.getElementById('meta-end-date').innerText = `${y}-${m}-${d}`;
-        } else {
-            document.getElementById('meta-end-date').innerText = "自動計算";
+        let endDEl = document.getElementById('meta-end-date');
+        if (endDEl) {
+            if (meta.startDate && meta.duration > 0) {
+                let startD = new Date(meta.startDate);
+                let extensionDays = parseInt(meta.extension) || 0;
+                let totalDaysToAdd = parseInt(meta.duration) + suspensionDays + extensionDays - 1;
+                startD.setDate(startD.getDate() + totalDaysToAdd);
+                let y = startD.getFullYear();
+                let m = String(startD.getMonth() + 1).padStart(2, '0');
+                let d = String(startD.getDate()).padStart(2, '0');
+                endDEl.innerText = `${y}-${m}-${d}`;
+            } else {
+                endDEl.innerText = "自動計算";
+            }
         }
     }
 
@@ -976,7 +977,7 @@
                     siteData.days[dayIndex].pmPhotoName = file.name;
                 }
                 saveDB();
-                renderSitePane();
+                initUI();
                 alert(`${session === 'am' ? '上午' : '下午'}報班照片上傳成功！`);
             };
             reader.readAsDataURL(file);
@@ -988,16 +989,25 @@
         if (!table) return;
         table.querySelectorAll('th').forEach((th) => {
             let resizer = th.querySelector('.resizer');
-            if (!resizer) {
-                resizer = document.createElement('div');
-                resizer.className = 'resizer';
-                th.appendChild(resizer);
-            }
-            let x = 0; let w = 0;
+            if (!resizer) return;
+            let startX = 0; let startWidth = 0;
             resizer.onmousedown = function (e) {
-                x = e.clientX; w = th.offsetWidth;
-                document.onmousemove = function (e2) { th.style.width = `${w + (e2.clientX - x)}px`; };
-                document.onmouseup = function () { document.onmousemove = null; document.onmouseup = null; };
+                startX = e.clientX;
+                startWidth = th.offsetWidth;
+                resizer.classList.add('resizing');
+                
+                document.onmousemove = function (e2) {
+                    let newWidth = startWidth + (e2.clientX - startX);
+                    if (newWidth > 40) {
+                        th.style.width = newWidth + 'px';
+                    }
+                };
+                document.onmouseup = function () {
+                    resizer.classList.remove('resizing');
+                    document.onmousemove = null;
+                    document.onmouseup = null;
+                };
+                e.stopPropagation();
             };
         });
     }
@@ -1009,7 +1019,7 @@
         if (isChecked) { if (!targetList.includes(workerName)) targetList.push(workerName); }
         else { let idx = targetList.indexOf(workerName); if (idx > -1) targetList.splice(idx, 1); }
         saveDB();
-        renderSitePane();
+        initUI();
     }
 
     function updateField(dayIndex, fieldName, value) {
@@ -1020,13 +1030,13 @@
     function updateWorkerList() {
         let inputVal = document.getElementById('worker-list-input').value;
         appData[currentMonth].data[currentSiteId].workers = inputVal.split(',').map(w => w.trim()).filter(w => w !== '');
-        saveDB(); renderSitePane(); alert('名單已更新！');
+        saveDB(); initUI(); alert('名單已更新！');
     }
 
     function initReportPane() {
         const select = document.getElementById('report-date-select');
-        let firstSiteId = appData[currentMonth].sites[0].id;
-        let siteData = appData[currentMonth].data[firstSiteId];
+        let firstActiveSite = appData[currentMonth].sites.find(s => !s.isWarrantyRoot) || appData[currentMonth].sites[0];
+        let siteData = appData[currentMonth].data[firstActiveSite.id];
         select.innerHTML = '';
         if (siteData && siteData.days) {
             siteData.days.forEach((day, index) => {
@@ -1062,8 +1072,9 @@
         if (selectIndex === undefined) return;
         let monthSites = appData[currentMonth].sites;
         let monthDataObj = appData[currentMonth].data;
-        if (!monthDataObj[monthSites[0].id]) return;
-        let dayData = monthDataObj[monthSites[0].id].days[selectIndex];
+        let firstActiveSite = monthSites.find(s => !s.isWarrantyRoot);
+        if (!firstActiveSite || !monthDataObj[firstActiveSite.id]) return;
+        let dayData = monthDataObj[firstActiveSite.id].days[selectIndex];
         let fullDateStr = `${currentMonth}${dayData.dateStr}`;
 
         let activeSitesAm = [];
@@ -1168,7 +1179,7 @@
         if (!siteId) return;
         if (!appData[currentMonth].logs[siteId]) appData[currentMonth].logs[siteId] = {};
         if (!appData[currentMonth].logs[siteId][dayIndex]) {
-            appData[currentMonth].logs[siteId][dayIndex] = { weatherAm: '晴', weatherPm: '晴', workersSummary: '', progress: '', trades: {}, sampling: '', notice: '', important: '' };
+            appData[currentMonth].logs[siteId][dayIndex] = { weatherAm: '晴', weatherPm: '晴', progress: '', trades: {}, sampling: '', notice: '', important: '' };
         }
         let log = appData[currentMonth].logs[siteId][dayIndex];
 
@@ -1280,7 +1291,7 @@ ${tText}
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding-left: 5px; padding-right: 5px;">
                         <h4 style="color: #2d3748; margin: 0;">${site.name}（保固案場總覽）</h4>
                         <div>
-                            <button class="btn btn-success btn-sm" onclick="exportSingleSiteMonthly('${site.id}')">📥 下載保固案場 Excel</button>
+                            <button class="btn btn-red btn-sm" onclick="exportSingleSiteMonthly('${site.id}')">📥 下載保固案場 Excel</button>
                         </div>
                     </div>
                 `;
@@ -1303,8 +1314,8 @@ ${tText}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding-left: 5px; padding-right: 5px;">
                     <h4 style="color: #2d3748; margin: 0;">${site.name}</h4>
                     <div>
-                        <button class="btn btn-success btn-sm" onclick="exportSingleSiteMonthly('${site.id}')">📥 下載此案場當月 Excel</button>
-                        <button class="btn btn-purple btn-sm" onclick="exportSingleSiteYearly('${site.id}')">📈 下載此案場年度 Excel</button>
+                        <button class="btn btn-red btn-sm" onclick="exportSingleSiteMonthly('${site.id}')">📥 下載此案場當月 Excel</button>
+                        <button class="btn btn-blue btn-sm" onclick="exportSingleSiteYearly('${site.id}')">📈 下載此案場年度 Excel</button>
                     </div>
                 </div>
             `;
