@@ -263,6 +263,15 @@
             background: #f8fafc; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 15px;
         }
         .log-field input { width: 70px; text-align: center; }
+
+        /* 燈箱 Modal 樣式 */
+        #imageLightbox {
+            display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.8);
+            justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(4px);
+        }
+        #imageLightbox img {
+            max-width: 90%; max-height: 90vh; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); object-fit: contain; background: #fff;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -300,7 +309,7 @@
             <button class="btn btn-red" onclick="addNewMonth()">＋ 新增年月</button>
         </div>
         <div class="control-group">
-            <input type="text" id="new-site-name" placeholder="請輸入新案場名稱" style="width: 200px;">
+            <input type="text" id="new-site-name" placeholder="請輸入新案場名稱 (例如: 新市工地)" style="width: 240px;">
             <button class="btn btn-red" onclick="addNewSite()">＋ 新增案場</button>
         </div>
     </div>
@@ -398,11 +407,17 @@
     </div>
 </div>
 
+<!-- 圖片放大檢視燈箱 -->
+<div id="imageLightbox" onclick="closeLightbox()">
+    <img id="lightboxImg" src="">
+</div>
+
 <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4rFaW0Suvyc0eaPaxISxNrJvEkJjmWdgM_Aqw2pFafvpy-uodbYA6z4Ia7cczzZNC/exec";
 
     const defaultWorkers = ["盧明君", "林智宇", "吳炫德", "邱龍展"];
     const tradeList = ["植筋工", "鋼筋工", "模板工", "泥水工", "機械操作工", "體力工", "建築細木工", "水電工", "混凝土澆置工", "路面鋪設工", "砌石工", "油漆工", "鐵工", "鷹架工", "吊車", "防水工"];
+    const encircledNumbers = ['⓪', '❶', '❷', '❸', '❹', '❺', '❻', '❼', '❽', '❾', '❿'];
 
     function getInitialDB() {
         let db = {};
@@ -419,7 +434,6 @@
                 data: {}, 
                 logs: {}, 
                 meta: {}, 
-                customSiteNames: {},
                 warrantySubSites: {
                     'warranty_pool': [
                         { id: 'sub_1', name: '某某學校維修案', date: '2026-09-09', workers: '盧明君', project: '保固修繕漏水', note: '已完成' }
@@ -452,7 +466,6 @@
                 db[m].data[site.id] = { workers: [...defaultWorkers], days: dayList };
                 db[m].logs[site.id] = siteLogs;
                 db[m].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
-                db[m].customSiteNames[site.id] = site.title; 
             });
         });
         return db;
@@ -461,16 +474,17 @@
     let appData = JSON.parse(localStorage.getItem('construction_master_db_cloud')) || getInitialDB();
 
     Object.keys(appData).forEach(m => {
+        if (appData[m].sites) {
+            appData[m].sites.forEach(s => {
+                if (s.title && s.title.startsWith('臺南市')) {
+                    s.title = s.title.replace('臺南市', '');
+                }
+            });
+        }
         if (!appData[m].sites) appData[m].sites = [];
         if (!appData[m].sites.some(s => s.id === 'warranty_pool')) {
             appData[m].sites.push({ id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true });
         }
-        if (!appData[m].customSiteNames) appData[m].customSiteNames = {};
-        appData[m].sites.forEach(s => {
-            if (!s.isWarrantyRoot && !appData[m].customSiteNames[s.id]) {
-                appData[m].customSiteNames[s.id] = s.title;
-            }
-        });
         if (!appData[m].warrantySubSites) appData[m].warrantySubSites = {};
         if (!appData[m].warrantySubSites['warranty_pool']) {
             appData[m].warrantySubSites['warranty_pool'] = [];
@@ -512,20 +526,19 @@
             if (json && json.data && Object.keys(json.data).length > 0) {
                 appData = json.data;
                 Object.keys(appData).forEach(m => {
+                    if (appData[m].sites) {
+                        appData[m].sites.forEach(s => {
+                            if (s.title && s.title.startsWith('臺南市')) {
+                                s.title = s.title.replace('臺南市', '');
+                            }
+                        });
+                    }
                     if (!appData[m].sites) appData[m].sites = [];
                     if (!appData[m].sites.some(s => s.id === 'warranty_pool')) {
                         appData[m].sites.push({ id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true });
                     }
-                    if (!appData[m].customSiteNames) appData[m].customSiteNames = {};
-                    appData[m].sites.forEach(s => {
-                        if (!s.isWarrantyRoot && !appData[m].customSiteNames[s.id]) {
-                            appData[m].customSiteNames[s.id] = s.title;
-                        }
-                    });
                     if (!appData[m].warrantySubSites) appData[m].warrantySubSites = {};
-                    if (!appData[m].warrantySubSites['warranty_pool']) {
-                        appData[m].warrantySubSites['warranty_pool'] = [];
-                    }
+                    if (!appData[m].warrantySubSites['warranty_pool']) appData[m].warrantySubSites['warranty_pool'] = [];
                 });
                 saveDB();
                 initUI();
@@ -537,6 +550,17 @@
         } catch (err) {
             alert('載入失敗：' + err);
         }
+    }
+
+    function openLightbox(imgSrc) {
+        if (!imgSrc) return;
+        document.getElementById('lightboxImg').src = imgSrc;
+        document.getElementById('imageLightbox').style.display = 'flex';
+    }
+
+    function closeLightbox() {
+        document.getElementById('imageLightbox').style.display = 'none';
+        document.getElementById('lightboxImg').src = '';
     }
 
     function getWeekdayString(monthStr, dayIndex) {
@@ -569,7 +593,7 @@
                 { id: 'annan', name: '安南-溪頂', title: '安南區溪頂寮工程' },
                 { id: 'company', name: '公司', title: '公司內部行政作業' },
                 { id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true }
-            ], data: {}, logs: {}, meta: {}, customSiteNames: {}, warrantySubSites: { 'warranty_pool': [] } };
+            ], data: {}, logs: {}, meta: {}, warrantySubSites: { 'warranty_pool': [] } };
             
             appData[currentMonth].sites.forEach(site => {
                 if (site.isWarrantyRoot) return;
@@ -581,7 +605,6 @@
                 appData[currentMonth].data[site.id] = { workers: [...defaultWorkers], days: dayList };
                 appData[currentMonth].logs[site.id] = siteLogs;
                 appData[currentMonth].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
-                appData[currentMonth].customSiteNames[site.id] = site.title;
             });
             saveDB();
         }
@@ -607,7 +630,7 @@
             { id: 'warranty_pool', name: '保固中案場', title: '保固中各維修案場管理', isWarrantyRoot: true, fixed: true }
         ];
 
-        appData[val] = { sites: newSites, data: {}, logs: {}, meta: {}, customSiteNames: {}, warrantySubSites: { 'warranty_pool': [] } };
+        appData[val] = { sites: newSites, data: {}, logs: {}, meta: {}, warrantySubSites: { 'warranty_pool': [] } };
         newSites.forEach(site => {
             if (site.isWarrantyRoot) return;
             let dayList = []; let siteLogs = {};
@@ -618,7 +641,6 @@
             appData[val].data[site.id] = { workers: [...defaultWorkers], days: dayList };
             appData[val].logs[site.id] = siteLogs;
             appData[val].meta[site.id] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
-            appData[val].customSiteNames[site.id] = site.title;
         });
         saveDB(); currentMonth = val;
         document.getElementById('new-year-input').value = '';
@@ -633,7 +655,7 @@
         let monthSites = appData[currentMonth].sites;
         if (monthSites.some(s => s.name === name)) { alert('名稱已存在！'); return; }
         
-        let newSiteObj = { id: siteId, name: name, title: name };
+        let newSiteObj = { id: siteId, name: name, title: `${name}工程` };
         let warrantyIdx = monthSites.findIndex(s => s.isWarrantyRoot);
         if (warrantyIdx !== -1) {
             monthSites.splice(warrantyIdx, 0, newSiteObj);
@@ -650,8 +672,6 @@
         appData[currentMonth].logs[siteId] = siteLogs;
         if (!appData[currentMonth].meta) appData[currentMonth].meta = {};
         appData[currentMonth].meta[siteId] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
-        if (!appData[currentMonth].customSiteNames) appData[currentMonth].customSiteNames = {};
-        appData[currentMonth].customSiteNames[siteId] = name;
         saveDB(); currentSiteId = siteId;
         document.getElementById('new-site-name').value = '';
         initUI();
@@ -671,7 +691,6 @@
         delete appData[currentMonth].data[siteId];
         delete appData[currentMonth].logs[siteId];
         if (appData[currentMonth].meta) delete appData[currentMonth].meta[siteId];
-        if (appData[currentMonth].customSiteNames) delete appData[currentMonth].customSiteNames[siteId];
         if (appData[currentMonth].warrantySubSites && appData[currentMonth].warrantySubSites[siteId]) {
             delete appData[currentMonth].warrantySubSites[siteId];
         }
@@ -687,18 +706,12 @@
             alert('此為固定案場，名稱無法修改！');
             return;
         }
-        let newName = prompt("請輸入新的分頁按鈕名稱：", site.name);
+        let newName = prompt("請輸入新的案場名稱：", site.name);
         if (!newName || !newName.trim()) return;
-        let clean = newName.trim();
-        site.name = clean;
+        let cleanName = newName.trim();
+        site.name = cleanName;
+        site.title = `${cleanName}工程`;
         saveDB(); initUI();
-    }
-
-    // 獨立處理紅框輸入框，不再更動上方按鈕名稱
-    function updateCustomSiteName(val) {
-        if (!appData[currentMonth].customSiteNames) appData[currentMonth].customSiteNames = {};
-        appData[currentMonth].customSiteNames[currentSiteId] = val;
-        saveDB();
     }
 
     function initUI() {
@@ -800,10 +813,6 @@
             let subList = appData[currentMonth].warrantySubSites[currentSiteId];
 
             let html = `
-                <div style="font-size: 16px; font-weight: bold; color: #1e331e; margin-bottom: 12px; background: #b6d7a8; padding: 10px 15px; border-radius: 6px; border: 1px solid #93c47d; display: flex; align-items: center; gap: 10px;">
-                    <label><strong>案場名稱：</strong></label>
-                    <input type="text" value="${siteObj.name}" readonly style="padding: 6px 10px; font-size: 15px; border: 1px solid #93c47d; border-radius: 4px; width: 400px; background: #fff;">
-                </div>
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
                     <button class="btn btn-red" onclick="addWarrantySubRow()">＋ 新增</button>
                 </div>
@@ -852,16 +861,8 @@
             appData[currentMonth].meta[currentSiteId] = { startDate: '', duration: 0, durationType: '日曆天', extension: 0, suspensionDate: '', resumptionDate: '' };
         }
         let meta = appData[currentMonth].meta[currentSiteId];
-        
-        if (!appData[currentMonth].customSiteNames) appData[currentMonth].customSiteNames = {};
-        let currentCustomName = appData[currentMonth].customSiteNames[currentSiteId] !== undefined ? appData[currentMonth].customSiteNames[currentSiteId] : siteObj.title;
 
         let html = `
-            <div style="font-size: 16px; font-weight: bold; color: #1e331e; margin-bottom: 12px; background: #b6d7a8; padding: 10px 15px; border-radius: 6px; border: 1px solid #93c47d; display: flex; align-items: center; gap: 10px;">
-                <label><strong>案場名稱：</strong></label>
-                <input type="text" value="${currentCustomName}" oninput="updateCustomSiteName(this.value)" style="padding: 6px 10px; font-size: 15px; border: 1px solid #93c47d; border-radius: 4px; width: 400px; background: #fff;">
-            </div>
-
             <div class="project-meta-panel">
                 <div class="meta-item">
                     <label><strong>開工日期：</strong></label>
@@ -934,6 +935,15 @@
         siteData.days.forEach((row, index) => {
             let unworkedWorkers = siteData.workers.filter(w => !row.amWorkers.includes(w) && !row.pmWorkers.includes(w));
             let tr = document.createElement('tr');
+            
+            let amPhotoHtml = row.amPhoto ? 
+                `<div style="font-size: 10px; color: #2b6cb0; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px; cursor: pointer;" onclick="openLightbox('${row.amPhoto}')" title="點擊放大圖片">🔍 ${row.amPhotoName || '檢視圖片'}</div>
+                 <button class="btn btn-sm" style="background:#e53e3e; color:#fff; font-size:10px; padding:2px 6px; margin-top:2px;" onclick="clearRowPhoto(${index}, 'am')">✕ 刪除</button>` : '';
+            
+            let pmPhotoHtml = row.pmPhoto ? 
+                `<div style="font-size: 10px; color: #2b6cb0; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px; cursor: pointer;" onclick="openLightbox('${row.pmPhoto}')" title="點擊放大圖片">🔍 ${row.pmPhotoName || '檢視圖片'}</div>
+                 <button class="btn btn-sm" style="background:#e53e3e; color:#fff; font-size:10px; padding:2px 6px; margin-top:2px;" onclick="clearRowPhoto(${index}, 'pm')">✕ 刪除</button>` : '';
+
             tr.innerHTML = `
                 <td style="color: #1a202c; font-weight: bold;">${row.dayIndex}</td>
                 <td><strong style="white-space: nowrap;">${currentMonth}${row.dateStr}</strong></td>
@@ -942,14 +952,14 @@
                 <td><input type="time" value="${row.amTime || ''}" onchange="updateField(${index}, 'amTime', this.value)" style="width: 85px; padding: 4px; font-size: 13px;"></td>
                 <td>
                     <input type="file" accept="image/*" onchange="updateRowPhoto(${index}, 'am', this)" style="font-size: 10px; width: 110px; margin-bottom: 2px;">
-                    <div style="font-size: 10px; color: #2b6cb0; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px;">${row.amPhotoName || ''}</div>
+                    ${amPhotoHtml}
                 </td>
                 <td><div class="worker-selector">${siteData.workers.map(w => `<label class="worker-badge"><input type="checkbox" value="${w}" ${row.pmWorkers.includes(w) ? 'checked' : ''} onchange="updateWorker(${index}, 'pm', '${w}', this.checked)">${w}</label>`).join('')}</div></td>
                 <td><textarea class="resizable-box" oninput="updateField(${index}, 'pmProject', this.value)">${row.pmProject || ''}</textarea></td>
                 <td><input type="time" value="${row.pmTime || ''}" onchange="updateField(${index}, 'pmTime', this.value)" style="width: 85px; padding: 4px; font-size: 13px;"></td>
                 <td>
                     <input type="file" accept="image/*" onchange="updateRowPhoto(${index}, 'pm', this)" style="font-size: 10px; width: 110px; margin-bottom: 2px;">
-                    <div style="font-size: 10px; color: #2b6cb0; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px;">${row.pmPhotoName || ''}</div>
+                    ${pmPhotoHtml}
                 </td>
                 <td><div style="text-align: left; padding: 4px;"><span class="unworked-display">${unworkedWorkers.length > 0 ? unworkedWorkers.join('、') : '無'}</span></div></td>
                 <td><textarea class="resizable-box" style="min-height: 40px;" oninput="updateField(${index}, 'note', this.value)">${row.note || ''}</textarea></td>
@@ -1068,6 +1078,19 @@
             };
             reader.readAsDataURL(file);
         }
+    }
+
+    function clearRowPhoto(dayIndex, session) {
+        let siteData = appData[currentMonth].data[currentSiteId];
+        if (session === 'am') {
+            siteData.days[dayIndex].amPhoto = '';
+            siteData.days[dayIndex].amPhotoName = '';
+        } else {
+            siteData.days[dayIndex].pmPhoto = '';
+            siteData.days[dayIndex].pmPhotoName = '';
+        }
+        saveDB();
+        initUI();
     }
 
     function initColumnResizer() {
@@ -1252,13 +1275,13 @@
         projSelect.innerHTML = '';
         appData[currentMonth].sites.forEach(s => {
             if (!s.isWarrantyRoot) {
-                projSelect.add(new Option(s.title, s.id));
+                let displayTitle = s.title;
+                if (displayTitle.startsWith('臺南市')) {
+                    displayTitle = displayTitle.replace('臺南市', '');
+                }
+                projSelect.add(new Option(displayTitle, s.id));
             }
         });
-
-        if (currentSiteId && currentSiteId !== 'report_tab' && currentSiteId !== 'log_tab' && currentSiteId !== 'export_tab') {
-            projSelect.value = currentSiteId;
-        }
     }
 
     function onLogProjectChange() { renderLogForm(); }
@@ -1323,11 +1346,11 @@
         let val = textarea.value;
         let lines = val.split('\n');
         let formatted = lines.map((line, idx) => {
-            let clean = line.replace(/^(\d+[\.、]\s*|[\u2460-\u2469]\s*|[①-⑽]\s*)/, '').trim();
+            let clean = line.replace(/^(\d+[\.、]\s*|[\u2460-\u2469]\s*|[\u24B6-\u24E9]\s*|[\u2776-\u277F]\s*|[❶-❿]\s*)/, '').trim();
             if (!clean) return '';
-            let circleNums = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
-            let numSymbol = (idx < 10) ? circleNums[idx] : `${idx + 1}.`;
-            return `${numSymbol} ${clean}`;
+            let num = idx + 1;
+            let symbol = (num >= 1 && num <= 10) ? encircledNumbers[num] : `${num}.`;
+            return `${symbol} ${clean}`;
         }).filter(l => l !== '').join('\n');
         
         textarea.value = formatted;
@@ -1345,11 +1368,11 @@
         let rawProgress = log.progress || '';
         let lines = rawProgress.split('\n');
         let formattedProgress = lines.map((line, idx) => {
-            let clean = line.replace(/^(\d+[\.、]\s*|[\u2460-\u2469]\s*|[①-⑽]\s*)/, '').trim();
+            let clean = line.replace(/^(\d+[\.、]\s*|[\u2460-\u2469]\s*|[\u24B6-\u24E9]\s*|[\u2776-\u277F]\s*|[❶-❿]\s*)/, '').trim();
             if (!clean) return '';
-            let circleNums = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
-            let numSymbol = (idx < 10) ? circleNums[idx] : `${idx + 1}.`;
-            return `${numSymbol} ${clean}`;
+            let num = idx + 1;
+            let symbol = (num >= 1 && num <= 10) ? encircledNumbers[num] : `${num}.`;
+            return `${symbol} ${clean}`;
         }).filter(l => l !== '').join('\n');
 
         document.getElementById('log-text-output').innerText = 
