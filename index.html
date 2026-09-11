@@ -1557,7 +1557,6 @@
         saveDB(); generateLogText();
     }
 
-    // 取消即時強制編號，改為當移開游標 (onblur) 或複製時才精準編號
     function formatProgressOnBlur(textarea) {
         let val = textarea.value;
         if (!val.trim()) return;
@@ -1588,9 +1587,15 @@
         let tTextArr = tradeList.map(t => `${t}-${log.trades && log.trades[t] || ''}人`);
         if (log.customTrades) {
             log.customTrades.forEach(ct => {
-                let cName = (ct.name && ct.name.trim() !== '') ? ct.name : '自訂工';
-                let cVal = ct.val || '';
-                tTextArr.push(`${cName}-${cVal}人`);
+                let cVal = ct.val ? ct.val.trim() : '';
+                let cName = ct.name ? ct.name.trim() : '';
+                
+                // 修正：只有當自訂工的「人數有填」或者「名稱有被修改（且非預設自訂工）」時才顯示
+                if (cVal !== '' || (cName !== '' && !cName.startsWith('自訂工'))) {
+                    let displayName = cName !== '' ? cName : '自訂工';
+                    let displayVal = cVal !== '' ? cVal : '0';
+                    tTextArr.push(`${displayName}-${displayVal}人`);
+                }
             });
         }
         let tText = tTextArr.join('\n');
