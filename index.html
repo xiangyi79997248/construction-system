@@ -1563,7 +1563,7 @@
         let lines = val.split('\n');
         let blueBoxNums = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
         let formatted = lines.map((line, idx) => {
-            let clean = line.replace(/^(\d+[\.、]\s*|[\u2460-\u2469]\s*|[①-⑽]\s*|[➊-➓]\s*|[1-10]️⃣\s*)/, '').trim();
+            let clean = line.replace(/^((?:\d{1,2}(?:\uFE0F?\u20E3)?|[①-⑽➊-➓])[\.、\s]*)/, '').trim();
             if (!clean) return '';
             let numSymbol = (idx < 10) ? blueBoxNums[idx] : `${idx + 1}.`;
             return `${numSymbol} ${clean}`;
@@ -1590,7 +1590,6 @@
                 let cVal = ct.val ? ct.val.trim() : '';
                 let cName = ct.name ? ct.name.trim() : '';
                 
-                // 修正：只有當自訂工的「人數有填」或者「名稱有被修改（且非預設自訂工）」時才顯示
                 if (cVal !== '' || (cName !== '' && !cName.startsWith('自訂工'))) {
                     let displayName = cName !== '' ? cName : '自訂工';
                     let displayVal = cVal !== '' ? cVal : '0';
@@ -1604,7 +1603,7 @@
         let lines = rawProgress.split('\n');
         let blueBoxNums = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
         let formattedProgress = lines.map((line, idx) => {
-            let clean = line.replace(/^(\d+[\.、]\s*|[\u2460-\u2469]\s*|[①-⑽]\s*|[➊-➓]\s*|[1-10]️⃣\s*)/, '').trim();
+            let clean = line.replace(/^((?:\d{1,2}(?:\uFE0F?\u20E3)?|[①-⑽➊-➓])[\.、\s]*)/, '').trim();
             if (!clean) return '';
             let numSymbol = (idx < 10) ? blueBoxNums[idx] : `${idx + 1}.`;
             return `${numSymbol} ${clean}`;
